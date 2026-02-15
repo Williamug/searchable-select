@@ -1,70 +1,76 @@
 {
-    "name": "williamug/searchable-select",
-    "description": "This is my package searchable-select",
-    "keywords": [
-        "Williamug",
-        "laravel",
-        "searchable-select"
-    ],
-    "homepage": "https://github.com/williamug/searchable-select",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "William Asaba",
-            "email": "asabawilliamdk@yahoo.com",
-            "role": "Developer"
-        }
-    ],
-    "require": {
-        "php": "^8.4",
-        "spatie/laravel-package-tools": "^1.16",
-        "illuminate/contracts": "^11.0||^12.0"
-    },
-    "require-dev": {
-        "laravel/pint": "^1.14",
-        "nunomaduro/collision": "^8.8",
-        "orchestra/testbench": "^10.0.0||^9.0.0",
-        "pestphp/pest": "^4.0",
-        "pestphp/pest-plugin-arch": "^4.0",
-        "pestphp/pest-plugin-laravel": "^4.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Williamug\\SearchableSelect\\": "src/",
-            "Williamug\\SearchableSelect\\Database\\Factories\\": "database/factories/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Williamug\\SearchableSelect\\Tests\\": "tests/",
-            "Workbench\\App\\": "workbench/app/"
-        }
-    },
-    "scripts": {
-        "post-autoload-dump": "@composer run prepare",
-        "prepare": "@php vendor/bin/testbench package:discover --ansi",
-        "analyse": "vendor/bin/phpstan analyse",
-        "test": "vendor/bin/pest",
-        "test-coverage": "vendor/bin/pest --coverage",
-        "format": "vendor/bin/pint"
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Williamug\\SearchableSelect\\SearchableSelectServiceProvider"
-            ],
-            "aliases": {
-                "SearchableSelect": "Williamug\\SearchableSelect\\Facades\\SearchableSelect"
-            }
-        }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+  "name": "williamug/searchable-select",
+  "description": "A beautiful, searchable dropdown component for Laravel Livewire 3 & 4 applications. Built with Alpine.js and Tailwind CSS - no external dependencies required!",
+  "keywords": [
+    "Williamug",
+    "laravel",
+    "searchable-select",
+    "livewire",
+    "select",
+    "dropdown",
+    "searchable-dropdown",
+    "select2"
+  ],
+  "homepage": "https://github.com/williamug/searchable-select",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "William Asaba",
+      "email": "asabawilliamdk@yahoo.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.4",
+    "illuminate/contracts": "^11.0||^12.0",
+    "livewire/livewire": "^3.0",
+    "spatie/laravel-package-tools": "^1.16"
+  },
+  "require-dev": {
+    "laravel/pint": "^1.14",
+    "nunomaduro/collision": "^8.8",
+    "orchestra/testbench": "^10.0.0||^9.0.0",
+    "pestphp/pest": "^4.0",
+    "pestphp/pest-plugin-arch": "^4.0",
+    "pestphp/pest-plugin-laravel": "^4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Williamug\\SearchableSelect\\": "src/",
+      "Williamug\\SearchableSelect\\Database\\Factories\\": "database/factories/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Williamug\\SearchableSelect\\Tests\\": "tests/",
+      "Workbench\\App\\": "workbench/app/"
+    }
+  },
+  "scripts": {
+    "post-autoload-dump": "@composer run prepare",
+    "prepare": "@php vendor/bin/testbench package:discover --ansi",
+    "analyse": "vendor/bin/phpstan analyse",
+    "test": "vendor/bin/pest",
+    "test-coverage": "vendor/bin/pest --coverage",
+    "format": "vendor/bin/pint"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true,
+      "phpstan/extension-installer": true
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Williamug\\SearchableSelect\\SearchableSelectServiceProvider"
+      ],
+      "aliases": {
+        "SearchableSelect": "Williamug\\SearchableSelect\\Facades\\SearchableSelect"
+      }
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
 }
