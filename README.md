@@ -18,6 +18,10 @@ A beautiful, searchable dropdown component for Laravel Livewire 3 & 4 applicatio
 ## Features
 
 - **Real-time search** - Client-side filtering as you type
+- **Multi-select support** - Select multiple options at once
+- **Ajax/API integration** - Fetch options dynamically from endpoints
+- **Grouped options** - Organize options into categories
+- **Clear button** - Easily clear selections
 - **Dark mode support** - Automatically adapts to your theme
 - **Accessible** - Keyboard navigation and ARIA attributes
 - **Livewire 3 & 4 compatible** - Works with both versions
@@ -199,8 +203,124 @@ class LocationSelector extends Component
 | `emptyMessage` | String | `'No options available'` | Message when options is empty |
 | `optionValue` | String | `'id'` | Key for option values |
 | `optionLabel` | String | `'name'` | Key for option labels |
+| `multiple` | Boolean | `false` | Enable multi-select mode |
+| `clearable` | Boolean | `true` | Show clear button when value selected |
+| `apiUrl` | String | `null` | API endpoint for dynamic options |
+| `apiSearchParam` | String | `'search'` | Query parameter name for API search |
+| `grouped` | Boolean | `false` | Enable grouped options |
+| `groupLabel` | String | `'label'` | Key for group labels |
+| `groupOptions` | String | `'options'` | Key for group options array |
 
 ## Advanced Examples
+
+### Multi-Select
+
+Select multiple options at once:
+
+```php
+public $selected_countries = []; // Array for multiple selections
+```
+
+```blade
+<x-searchable-select
+    :options="$countries"
+    wire-model="selected_countries"
+    :selected-value="$selected_countries"
+    :multiple="true"
+    placeholder="Select Countries"
+/>
+```
+
+### With Clear Button
+
+The clear button is enabled by default. Disable it if needed:
+
+```blade
+<x-searchable-select
+    :options="$countries"
+    wire-model="country_id"
+    :selected-value="$country_id"
+    :clearable="false"
+/>
+```
+
+### Grouped Options
+
+Organize options into groups:
+
+```php
+public $locations = [
+    [
+        'label' => 'North America',
+        'options' => [
+            ['id' => 1, 'name' => 'United States'],
+            ['id' => 2, 'name' => 'Canada'],
+            ['id' => 3, 'name' => 'Mexico'],
+        ]
+    ],
+    [
+        'label' => 'Europe',
+        'options' => [
+            ['id' => 4, 'name' => 'United Kingdom'],
+            ['id' => 5, 'name' => 'France'],
+            ['id' => 6, 'name' => 'Germany'],
+        ]
+    ],
+];
+```
+
+```blade
+<x-searchable-select
+    :options="$locations"
+    wire-model="country_id"
+    :selected-value="$country_id"
+    :grouped="true"
+    placeholder="Select Country"
+/>
+```
+
+### Ajax/API Integration
+
+Fetch options dynamically from an API endpoint:
+
+```blade
+<x-searchable-select
+    :options="[]"
+    wire-model="user_id"
+    :selected-value="$user_id"
+    api-url="{{ route('api.users.search') }}"
+    api-search-param="q"
+    placeholder="Search users..."
+/>
+```
+
+Your API endpoint should return JSON:
+
+```php
+// routes/api.php
+Route::get('/users/search', function (Request $request) {
+    $users = User::where('name', 'like', '%' . $request->q . '%')
+        ->limit(20)
+        ->get(['id', 'name']);
+
+    return response()->json(['data' => $users]);
+});
+```
+
+### Multi-Select with API
+
+Combine multiple selection with API search:
+
+```blade
+<x-searchable-select
+    :options="[]"
+    wire-model="selected_users"
+    :selected-value="$selected_users"
+    :multiple="true"
+    api-url="{{ route('api.users.search') }}"
+    placeholder="Select Team Members"
+/>
+```
 
 ### With Arrays
 
