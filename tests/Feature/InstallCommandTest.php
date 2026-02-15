@@ -110,7 +110,9 @@ test('it copies correct component content', function () {
     expect($content)
         ->toContain('@props')
         ->toContain('x-data')
-        ->toContain('wire:click')
+
+        ->toContain('@click')
+
         ->toContain('placeholder')
         ->toContain('selectedValue');
 });
