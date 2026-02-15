@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Searchable Select Demo')</title>
+    <title>{{ $title ?? 'Searchable Select Demo' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     @livewireStyles
 </head>
@@ -17,7 +17,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900">Searchable Select Component</h1>
-                        <p class="mt-2 text-gray-600">@yield('description', 'Beautiful, searchable dropdown for Laravel Livewire')</p>
+                        <p class="mt-2 text-gray-600">Beautiful, searchable dropdown for Laravel Livewire</p>
                     </div>
                     <a href="/" class="text-blue-600 hover:text-blue-800">← Back to Home</a>
                 </div>
@@ -36,15 +36,13 @@
                         class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 {{ request()->is('grouped') ? 'bg-gray-100 font-semibold' : '' }}">Grouped</a>
                     <a href="/api"
                         class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 {{ request()->is('api') ? 'bg-gray-100 font-semibold' : '' }}">API</a>
-                    <a href="/advanced"
-                        class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 {{ request()->is('advanced') ? 'bg-gray-100 font-semibold' : '' }}">Advanced</a>
                 </div>
             </div>
         </nav>
 
         <!-- Main Content -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            @yield('content')
+            {{ $slot }}
         </main>
 
         <!-- Footer -->

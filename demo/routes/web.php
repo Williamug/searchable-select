@@ -3,28 +3,16 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-  return view('welcome');
+  return view('demo');
 });
 
-Route::get('/basic', function () {
-  return view('examples.basic');
-});
+Route::get('/basic', App\Livewire\BasicExample::class);
 
-Route::get('/multi-select', function () {
-  return view('examples.multi-select');
-});
+Route::get('/multi-select', App\Livewire\MultiSelectExample::class);
 
-Route::get('/grouped', function () {
-  return view('examples.grouped');
-});
+Route::get('/grouped', App\Livewire\GroupedExample::class);
 
-Route::get('/api', function () {
-  return view('examples.api');
-});
-
-Route::get('/advanced', function () {
-  return view('examples.advanced');
-});
+Route::get('/api', App\Livewire\ApiExample::class);
 
 // API endpoint for searchable select
 Route::get('/api/countries', function () {
