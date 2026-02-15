@@ -2,24 +2,37 @@
 
 namespace Williamug\SearchableSelect;
 
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Williamug\SearchableSelect\Commands\SearchableSelectCommand;
+use Williamug\SearchableSelect\Commands\InstallSearchableSelectCommand;
+use Illuminate\Support\ServiceProvider;
 
-class SearchableSelectServiceProvider extends PackageServiceProvider
+class SearchableSelectServiceProvider extends ServiceProvider
 {
-    public function configurePackage(Package $package): void
-    {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
-        $package
-            ->name('searchable-select')
-            ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_searchable_select_table')
-            ->hasCommand(SearchableSelectCommand::class);
+  /**
+   * Register services.
+   */
+  public function register(): void
+  {
+    //
+  }
+
+  /**
+   * Bootstrap services.
+   */
+  public function boot(): void
+  {
+    // Register the installation command
+    if ($this->app->runningInConsole()) {
+      $this->commands([
+        InstallSearchableSelectCommand::class,
+      ]);
     }
+
+    // Publish the component view
+    $this->publishes([
+      __DIR__ . '/../resources/views/searchable-select.blade.php' => resource_path('views/components/searchable-select.blade.php'),
+    ], 'searchable-select-component');
+
+    // Load views from the package
+    $this->loadViewsFrom(__DIR__ . '/../resources/views', 'searchable-select');
+  }
 }
