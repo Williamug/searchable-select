@@ -8,7 +8,7 @@
 
 A beautiful, searchable dropdown component for Laravel Livewire 3 & 4 applications. Built with Alpine.js and Tailwind CSS - no external dependencies required!
 
-## 🎯 [Live Demo & Interactive Examples](./demo)
+## [Live Demo & Interactive Examples](./demo)
 
 Explore all features with live, interactive examples:
 - **[Basic Select](./demo/resources/views/examples/basic.blade.php)** - Simple searchable dropdown
