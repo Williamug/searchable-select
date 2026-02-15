@@ -2,6 +2,7 @@
 
 namespace Williamug\SearchableSelect;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class SearchableSelectServiceProvider extends ServiceProvider
@@ -22,9 +23,7 @@ class SearchableSelectServiceProvider extends ServiceProvider
         // Load views from the package
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'searchable-select');
 
-        // Register Blade component for <x-searchable-select /> syntax
-        $this->loadViewComponentsAs('', [
-            'searchable-select' => \Williamug\SearchableSelect\View\Components\SearchableSelect::class,
-        ]);
+        // Register the searchable-select view as an anonymous component
+        Blade::component('searchable-select::searchable-select', 'searchable-select');
     }
 }
