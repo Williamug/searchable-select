@@ -58,20 +58,15 @@ Install via Composer:
 composer require williamug/searchable-select
 ```
 
-Run the installation command:
+**That's it!** Start using the component immediately:
 
-```bash
-php artisan install:searchable-select
-```
-
-That's it! The component will be copied to `resources/views/components/searchable-select.blade.php`
-
-### Force reinstall
-
-If you want to overwrite an existing installation:
-
-```bash
-php artisan install:searchable-select --force
+```blade
+<x-searchable-select
+    :options="$countries"
+    wire-model="country_id"
+    :selected-value="$country_id"
+    placeholder="Select Country"
+/>
 ```
 
 ## Quick Start
