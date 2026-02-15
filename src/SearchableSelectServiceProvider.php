@@ -3,7 +3,6 @@
 namespace Williamug\SearchableSelect;
 
 use Illuminate\Support\ServiceProvider;
-use Williamug\SearchableSelect\Commands\InstallSearchableSelectCommand;
 
 class SearchableSelectServiceProvider extends ServiceProvider
 {
@@ -20,19 +19,12 @@ class SearchableSelectServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register the installation command
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                InstallSearchableSelectCommand::class,
-            ]);
-        }
-
-        // Publish the component view
-        $this->publishes([
-            __DIR__.'/../resources/views/searchable-select.blade.php' => resource_path('views/components/searchable-select.blade.php'),
-        ], 'searchable-select-component');
-
         // Load views from the package
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'searchable-select');
+
+        // Register Blade component for <x-searchable-select /> syntax
+        $this->loadViewComponentsAs('', [
+            'searchable-select' => \Williamug\SearchableSelect\View\Components\SearchableSelect::class,
+        ]);
     }
 }

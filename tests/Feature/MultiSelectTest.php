@@ -1,23 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\File;
 use Livewire\Component;
 use Livewire\Livewire;
 
-beforeEach(function () {
-    // Install the component for testing
-    $this->artisan('install:searchable-select')->run();
-});
+// Component is now loaded from vendor, no installation needed
 
-afterEach(function () {
-    // Clean up
-    $componentPath = resource_path('views/components/searchable-select.blade.php');
-    if (File::exists($componentPath)) {
-        File::delete($componentPath);
-    }
-});
-
-test('it supports multi-select mode', function () {
+test('it shows clear button when values selected', function () {
     $component = Livewire::test(MultiSelectComponent::class);
 
     expect($component->get('selected_countries'))->toBeArray();
@@ -58,7 +46,7 @@ test('it can remove individual selections', function () {
         ->not->toContain(2);
 });
 
-test('it shows clear button when values selected', function () {
+test('it shows clear button in single select mode', function () {
     $component = Livewire::test(ClearableComponent::class)
         ->set('country_id', 1);
 

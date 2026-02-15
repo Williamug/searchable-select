@@ -1,21 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\File;
 use Livewire\Component;
 use Livewire\Livewire;
 
-beforeEach(function () {
-    // Install the component for testing
-    $this->artisan('install:searchable-select')->run();
-});
-
-afterEach(function () {
-    // Clean up
-    $componentPath = resource_path('views/components/searchable-select.blade.php');
-    if (File::exists($componentPath)) {
-        File::delete($componentPath);
-    }
-});
+// Component is now loaded from vendor, no installation needed
 
 test('it renders grouped options', function () {
     $component = Livewire::test(GroupedOptionsComponent::class);
