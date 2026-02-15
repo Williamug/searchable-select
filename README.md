@@ -8,6 +8,17 @@
 
 A beautiful, searchable dropdown component for Laravel Livewire 3 & 4 applications. Built with Alpine.js and Tailwind CSS - no external dependencies required!
 
+## 🎯 [Live Demo & Interactive Examples](./demo)
+
+Explore all features with live, interactive examples:
+- **[Basic Select](./demo/resources/views/examples/basic.blade.php)** - Simple searchable dropdown
+- **[Multi-Select](./demo/resources/views/examples/multi-select.blade.php)** - Select multiple options with tags
+- **[Grouped Options](./demo/resources/views/examples/grouped.blade.php)** - Organize by categories
+- **[API Integration](./demo/resources/views/examples/api.blade.php)** - Dynamic loading from endpoints
+- **[Advanced Examples](./demo/resources/views/examples/advanced.blade.php)** - All features combined
+
+👉 **[Run the demo locally](./demo/README.md)** with Docker or PHP
+
 ## Screenshots
 
 <p align="center">
