@@ -63,7 +63,7 @@ test('it shows clear button when values selected', function () {
     ->set('country_id', 1);
 
   $html = $component->html();
-  expect($html)->toContain('wire:click.stop');
+  expect($html)->toContain('@click.stop="clearAll()');
 });
 
 test('it can clear all selections', function () {
