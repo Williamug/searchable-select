@@ -58,15 +58,20 @@ Install via Composer:
 composer require williamug/searchable-select
 ```
 
-**That's it!** Start using the component immediately:
+Run the installation command:
 
-```blade
-<x-searchable-select
-    :options="$countries"
-    wire-model="country_id"
-    :selected-value="$country_id"
-    placeholder="Select Country"
-/>
+```bash
+php artisan install:searchable-select
+```
+
+That's it! The component will be copied to `resources/views/components/searchable-select.blade.php`
+
+### Force reinstall
+
+If you want to overwrite an existing installation:
+
+```bash
+php artisan install:searchable-select --force
 ```
 
 ## Quick Start
@@ -198,24 +203,24 @@ class LocationSelector extends Component
 
 ## Component Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `options` | Array/Collection | `[]` | List of options to display |
-| `wireModel` | String | `''` | Livewire property to bind (required) |
-| `selectedValue` | Mixed | `null` | Currently selected value |
-| `placeholder` | String | `'Select option'` | Placeholder when nothing selected |
-| `searchPlaceholder` | String | `'Search...'` | Search input placeholder |
-| `disabled` | Boolean | `false` | Disable the dropdown |
-| `emptyMessage` | String | `'No options available'` | Message when options is empty |
-| `optionValue` | String | `'id'` | Key for option values |
-| `optionLabel` | String | `'name'` | Key for option labels |
-| `multiple` | Boolean | `false` | Enable multi-select mode |
-| `clearable` | Boolean | `true` | Show clear button when value selected |
-| `apiUrl` | String | `null` | API endpoint for dynamic options |
-| `apiSearchParam` | String | `'search'` | Query parameter name for API search |
-| `grouped` | Boolean | `false` | Enable grouped options |
-| `groupLabel` | String | `'label'` | Key for group labels |
-| `groupOptions` | String | `'options'` | Key for group options array |
+| Prop                | Type             | Default                  | Description                           |
+| ------------------- | ---------------- | ------------------------ | ------------------------------------- |
+| `options`           | Array/Collection | `[]`                     | List of options to display            |
+| `wireModel`         | String           | `''`                     | Livewire property to bind (required)  |
+| `selectedValue`     | Mixed            | `null`                   | Currently selected value              |
+| `placeholder`       | String           | `'Select option'`        | Placeholder when nothing selected     |
+| `searchPlaceholder` | String           | `'Search...'`            | Search input placeholder              |
+| `disabled`          | Boolean          | `false`                  | Disable the dropdown                  |
+| `emptyMessage`      | String           | `'No options available'` | Message when options is empty         |
+| `optionValue`       | String           | `'id'`                   | Key for option values                 |
+| `optionLabel`       | String           | `'name'`                 | Key for option labels                 |
+| `multiple`          | Boolean          | `false`                  | Enable multi-select mode              |
+| `clearable`         | Boolean          | `true`                   | Show clear button when value selected |
+| `apiUrl`            | String           | `null`                   | API endpoint for dynamic options      |
+| `apiSearchParam`    | String           | `'search'`               | Query parameter name for API search   |
+| `grouped`           | Boolean          | `false`                  | Enable grouped options                |
+| `groupLabel`        | String           | `'label'`                | Key for group labels                  |
+| `groupOptions`      | String           | `'options'`              | Key for group options array           |
 
 ## Advanced Examples
 
