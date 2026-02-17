@@ -222,10 +222,13 @@
                         <span class="badge bg-primary rounded-pill d-inline-flex align-items-center gap-1 px-2 py-1">
                             <span class="text-truncate" x-text="getLabel(val)" style="max-width: 150px;"></span>
                             <span @click.stop="removeSelection(val)"
-                                class="d-inline-flex align-items-center justify-content-center rounded-circle"
-                                role="button" aria-label="Remove"
-                                style="width: 16px; height: 16px; cursor: pointer; opacity: 0.8; font-weight: bold; font-size: 14px;">
-                                ×
+                                class="d-inline-flex align-items-center justify-content-center" role="button"
+                                aria-label="Remove" style="cursor: pointer; opacity: 0.9;">
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" style="display: block;">
+                                    <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" />
+                                </svg>
                             </span>
                         </span>
                     </template>
@@ -248,14 +251,23 @@
             {{-- Clear button --}}
             <span x-show="clearable && selectedValues.length > 0 && !disabled" x-cloak @click.stop="clearAll()"
                 role="button" aria-label="Clear selection" title="Clear"
-                style="cursor: pointer; font-size: 16px; line-height: 1; color: #6c757d; padding: 0 4px; font-weight: bold;">
-                ×
+                style="cursor: pointer; line-height: 1; color: #6c757d; padding: 0 4px; display: inline-flex; align-items: center;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    style="display: block;">
+                    <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
             </span>
 
             {{-- Dropdown arrow --}}
             <span
-                style="font-size: 12px; color: #6c757d; line-height: 1; transition: transform 0.2s; display: inline-block; font-weight: bold;"
-                :style="{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }">▼</span>
+                style="color: #6c757d; line-height: 1; transition: transform 0.2s; display: inline-flex; align-items: center;"
+                :style="{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }">
+                <svg width="10" height="10" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    style="display: block;">
+                    <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </span>
         </div>
     </div>
 
@@ -299,7 +311,13 @@
                                 :aria-selected="isSelected(option.value)">
                                 <span x-text="option.label" class="text-truncate"></span>
                                 <span x-show="isSelected(option.value)" class="ms-2"
-                                    style="font-weight: bold;">✓</span>
+                                    style="display: inline-flex; align-items: center;">
+                                    <svg width="14" height="14" viewBox="0 0 14 11" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg" style="display: block;">
+                                        <path d="M1 5.5L5 9.5L13 1.5" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
                             </a>
                         </template>
                     </div>
@@ -319,7 +337,14 @@
                         :data-highlighted="highlightedIndex === index" role="option"
                         :aria-selected="isSelected(option.value)">
                         <span x-text="option.label" class="text-truncate"></span>
-                        <span x-show="isSelected(option.value)" class="ms-2" style="font-weight: bold;">✓</span>
+                        <span x-show="isSelected(option.value)" class="ms-2"
+                            style="display: inline-flex; align-items: center;">
+                            <svg width="14" height="14" viewBox="0 0 14 11" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" style="display: block;">
+                                <path d="M1 5.5L5 9.5L13 1.5" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
                     </a>
                 </template>
                 <div x-show="filteredOptions.length === 0 && !loading"
