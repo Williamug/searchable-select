@@ -1,3 +1,22 @@
+@props([
+    'options' => [],
+    'wireModel' => '',
+    'placeholder' => 'Select option',
+    'searchPlaceholder' => 'Search...',
+    'disabled' => false,
+    'emptyMessage' => 'No options available',
+    'selectedValue' => null,
+    'optionValue' => 'id',
+    'optionLabel' => 'name',
+    'multiple' => false,
+    'clearable' => true,
+    'apiUrl' => null,
+    'apiSearchParam' => 'search',
+    'grouped' => false,
+    'groupLabel' => 'label',
+    'groupOptions' => 'options',
+])
+
 @php
     $selectedValues = $multiple && is_array($selectedValue) ? $selectedValue : ($selectedValue ? [$selectedValue] : []);
 
