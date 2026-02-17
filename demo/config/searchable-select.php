@@ -1,7 +1,7 @@
 <?php
 
 return [
-  /*
+    /*
     |--------------------------------------------------------------------------
     | Default Theme
     |--------------------------------------------------------------------------
@@ -11,7 +11,7 @@ return [
     |
     */
 
-  'theme' => env('SEARCHABLE_SELECT_THEME', 'bootstrap'),  /*
+    'theme' => env('SEARCHABLE_SELECT_THEME', 'bootstrap'),  /*
     |--------------------------------------------------------------------------
     | Bootstrap Version
     |--------------------------------------------------------------------------
@@ -22,5 +22,5 @@ return [
     |
     */
 
-  'bootstrap_version' => env('SEARCHABLE_SELECT_BOOTSTRAP_VERSION', '5'),
+    'bootstrap_version' => env('SEARCHABLE_SELECT_BOOTSTRAP_VERSION', '5'),
 ];
