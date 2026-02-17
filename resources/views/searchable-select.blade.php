@@ -15,12 +15,11 @@
     'grouped' => false,
     'groupLabel' => 'label',
     'groupOptions' => 'options',
+    'theme' => null,
 ])
 
 @php
-    $selectedValues = $multiple && is_array($selectedValue) ? $selectedValue : ($selectedValue ? [$selectedValue] : []);
-
-    // Pre-build options array for Alpine.js
+    $selectedValues = $multiple && is_array($selectedValue) ? $selectedValue : ($selectedValue ? [$selectedValue] : []); // Pre-build options array for Alpine.js
     $alpineOptions = [];
     if ($grouped) {
         foreach ($options as $group) {
@@ -218,7 +217,7 @@
 
     {{-- Trigger --}}
     <div @click="toggleDropdown()"
-        {{ $attributes->merge(['class' => 'w-full text-left border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white cursor-pointer select-none transition-shadow']) }}
+        {{ $attributes->except(['options', 'wireModel', 'placeholder', 'searchPlaceholder', 'disabled', 'emptyMessage', 'selectedValue', 'optionValue', 'optionLabel', 'multiple', 'clearable', 'apiUrl', 'apiSearchParam', 'grouped', 'groupLabel', 'groupOptions', 'theme'])->merge(['class' => 'w-full text-left border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white cursor-pointer select-none transition-shadow']) }}
         :class="{
             'opacity-50 cursor-not-allowed': disabled,
             'ring-2 ring-blue-500 border-blue-500': open

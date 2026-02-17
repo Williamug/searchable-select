@@ -14,6 +14,10 @@ Route::get('/grouped', App\Livewire\GroupedExample::class);
 
 Route::get('/api', App\Livewire\ApiExample::class);
 
+Route::get('/bootstrap', function () {
+    return view('bootstrap-demo');
+});
+
 // API endpoint for searchable select
 Route::get('/api/countries', function () {
     $search = request('search', '');

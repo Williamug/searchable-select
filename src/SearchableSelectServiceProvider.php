@@ -12,7 +12,11 @@ class SearchableSelectServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Merge config
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/searchable-select.php',
+            'searchable-select'
+        );
     }
 
     /**
@@ -25,5 +29,12 @@ class SearchableSelectServiceProvider extends ServiceProvider
 
         // Register the searchable-select view as an anonymous component
         Blade::component('searchable-select::searchable-select', 'searchable-select');
+
+        // Publish config
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/searchable-select.php' => config_path('searchable-select.php'),
+            ], 'searchable-select-config');
+        }
     }
 }
