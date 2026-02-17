@@ -40,22 +40,22 @@ A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 
 
 ## Features
 
-- ✅ **Real-time search** - Client-side filtering as you type
-- ✅ **Multi-select support** - Select multiple options with visual tags/badges
-- ✅ **Ajax/API integration** - Fetch options dynamically from REST endpoints
-- ✅ **Grouped options** - Organize options into labeled categories
-- ✅ **Clear button** - Quickly clear selections
-- ✅ **Dark mode support** - Automatically adapts to your theme (Tailwind)
-- ✅ **Accessible** - Full keyboard navigation and ARIA attributes
-- ✅ **Livewire 3 & 4 compatible** - Works seamlessly with both versions
-- ✅ **Responsive** - Mobile-friendly and touch-optimized
-- ✅ **Disabled state** - Conditional disabling support
-- ✅ **Flexible data** - Works with Eloquent models, arrays, collections
-- ✅ **Dependent dropdowns** - Perfect for cascading country → region → city selects
-- ✅ **Multiple CSS frameworks** - Full support for Tailwind CSS and Bootstrap 5
-- ✅ **Per-component theme override** - Mix frameworks in the same app
-- ✅ **Customizable** - Override styles and behavior
-- ✅ **Zero config** - Works immediately after installation
+- **Real-time search** - Client-side filtering as you type
+- **Multi-select support** - Select multiple options with visual tags/badges
+- **Ajax/API integration** - Fetch options dynamically from REST endpoints
+- **Grouped options** - Organize options into labeled categories
+- **Clear button** - Quickly clear selections
+- **Dark mode support** - Automatically adapts to your theme (Tailwind)
+- **Accessible** - Full keyboard navigation and ARIA attributes
+- **Livewire 3 & 4 compatible** - Works seamlessly with both versions
+- **Responsive** - Mobile-friendly and touch-optimized
+- **Disabled state** - Conditional disabling support
+- **Flexible data** - Works with Eloquent models, arrays, collections
+- **Dependent dropdowns** - Perfect for cascading country → region → city selects
+- **Multiple CSS frameworks** - Full support for Tailwind CSS and Bootstrap 5
+- **Per-component theme override** - Mix frameworks in the same app
+- **Customizable** - Override styles and behavior
+- **Zero config** - Works immediately after installation
 
 ## Screenshots
 
@@ -83,6 +83,12 @@ composer require williamug/searchable-select
 ```
 
 The package will automatically register its service provider. You're ready to use it immediately!
+
+You can publish the configuration file:
+
+```bash
+php artisan vendor:publish --tag=searchable-select-config
+```
 
 ## CSS Framework Setup
 
@@ -173,7 +179,7 @@ Add to your `.env` file:
 SEARCHABLE_SELECT_THEME=bootstrap
 ```
 
-**3. Include Bootstrap assets in your layout:**
+**3. Include Bootstrap assets in your layout if you haven't already:**
 
 Add to your `resources/views/layouts/app.blade.php` (or wherever your layout is):
 
@@ -1461,16 +1467,16 @@ composer test -- --coverage
 ### Test Coverage
 
 The package tests include:
-- ✅ Component rendering (Tailwind & Bootstrap)
-- ✅ Single-select functionality
-- ✅ Multi-select with badges/tags
-- ✅ Grouped options rendering
-- ✅ Theme switching and overrides
-- ✅ Service provider registration
-- ✅ Configuration loading
-- ✅ Install command
+- Component rendering (Tailwind & Bootstrap)
+- Single-select functionality
+- Multi-select with badges/tags
+- Grouped options rendering
+- Theme switching and overrides
+- Service provider registration
+- Configuration loading
+- Install command
 
-**24 tests, 46 assertions** - all passing ✅
+**24 tests, 46 assertions** - all passing
 
 ## Demo Application
 
