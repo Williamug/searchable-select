@@ -6,7 +6,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/williamug/searchable-select.svg?style=flat-square)](https://packagist.org/packages/williamug/searchable-select)
 [![License](https://img.shields.io/packagist/l/williamug/searchable-select.svg?style=flat-square)](https://packagist.org/packages/williamug/searchable-select)
 
-A beautiful, searchable dropdown component for Laravel Livewire 3 & 4 applications. Built with Alpine.js and Tailwind CSS - no external dependencies required!
+A beautiful, searchable dropdown component for Laravel Livewire 3 & 4 applications. Built with Alpine.js - supports both **Tailwind CSS** and **Bootstrap 5**!
 
 ## [Live Demo & Interactive Examples](./demo)
 
@@ -40,14 +40,18 @@ Explore all features with live, interactive examples:
 - **Disabled state** - Conditional disabling support
 - **Flexible data** - Works with models, arrays, collections
 - **Dependent dropdowns** - Perfect for cascading selects
-- **Customizable** - Override styles with Tailwind classes
+- **Multiple CSS frameworks** - Works with Tailwind CSS or Bootstrap 5
+- **Customizable** - Override styles with framework classes
 - **Zero config** - Works out of the box
+
 ## Requirements
 
 - PHP 8.1+
 - Laravel 9.x, 10.x, 11.x, or 12.x
 - Livewire 3.x or 4.x
-- Tailwind CSS 3.x+
+- **One of:**
+  - Tailwind CSS 3.x+ (default)
+  - Bootstrap 5.x+
 - Alpine.js (bundled with Livewire)
 
 ## Installation
@@ -58,21 +62,41 @@ Install via Composer:
 composer require williamug/searchable-select
 ```
 
-Run the installation command:
+### Framework Configuration
+
+By default, the component uses **Tailwind CSS**. To use **Bootstrap 5**, publish the config file:
 
 ```bash
-php artisan install:searchable-select
+php artisan vendor:publish --tag=searchable-select-config
 ```
 
-That's it! The component will be copied to `resources/views/components/searchable-select.blade.php`
+Then edit `config/searchable-select.php`:
 
-### Force reinstall
-
-If you want to overwrite an existing installation:
-
-```bash
-php artisan install:searchable-select --force
+```php
+return [
+    'theme' => 'bootstrap', // Change from 'tailwind' to 'bootstrap'
+];
 ```
+
+Or set it in your `.env` file:
+
+```env
+SEARCHABLE_SELECT_THEME=bootstrap
+```
+
+### Per-Component Theme Override
+
+You can override the theme for individual components:
+
+```blade
+{{-- Use Bootstrap for this component only --}}
+<x-searchable-select theme="bootstrap" :options="$countries" wire-model="country_id" />
+
+{{-- Use Tailwind for this component only --}}
+<x-searchable-select theme="tailwind" :options="$cities" wire-model="city_id" />
+```
+
+That's it! Start using the component immediately.
 
 ## Quick Start
 
@@ -221,6 +245,7 @@ class LocationSelector extends Component
 | `grouped`           | Boolean          | `false`                  | Enable grouped options                |
 | `groupLabel`        | String           | `'label'`                | Key for group labels                  |
 | `groupOptions`      | String           | `'options'`              | Key for group options array           |
+| `theme`             | String           | `null`                   | Override theme (`'tailwind'` or `'bootstrap'`) |
 
 ## Advanced Examples
 
@@ -402,15 +427,35 @@ protected $rules = [
 
 ### Tailwind Configuration
 
-Make sure your `tailwind.config.js` includes the component path:
+Make sure your `tailwind.config.js` includes the package views:
 
 ```js
 export default {
   content: [
     './resources/views/**/*.blade.php',
-    './resources/views/components/**/*.blade.php',
+    './vendor/williamug/searchable-select/resources/views/**/*.blade.php',
   ],
 }
+```
+
+### Bootstrap Setup
+
+When using Bootstrap 5, make sure you have:
+
+1. **Bootstrap CSS** loaded in your layout:
+```html
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+```
+
+2. **Bootstrap JavaScript** (optional, for additional features):
+```html
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+```
+
+3. **Config set to bootstrap**:
+```php
+// config/searchable-select.php
+'theme' => 'bootstrap',
 ```
 
 ### Create Specialized Components
@@ -446,10 +491,15 @@ Create a dedicated component for common use cases:
 - Check `optionValue` prop matches your data structure
 - Ensure the value exists in options array
 
-### Styling issues
+### Styling issues (Tailwind)
 - Run `npm run build` to compile Tailwind
-- Verify component path in `tailwind.config.js`
+- Verify package path in `tailwind.config.js`
 - Check for CSS conflicts
+
+### Styling issues (Bootstrap)
+- Ensure Bootstrap 5.x CSS is loaded
+- Verify theme is set to `'bootstrap'` in config
+- Check browser console for CSS errors
 
 ## Performance
 
