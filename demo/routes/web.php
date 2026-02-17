@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('demo');
+  return view('demo');
 });
 
 Route::get('/basic', App\Livewire\BasicExample::class);
@@ -14,33 +14,37 @@ Route::get('/grouped', App\Livewire\GroupedExample::class);
 
 Route::get('/api', App\Livewire\ApiExample::class);
 
+Route::get('/bootstrap', function () {
+  return view('bootstrap-demo');
+});
+
 // API endpoint for searchable select
 Route::get('/api/countries', function () {
-    $search = request('search', '');
+  $search = request('search', '');
 
-    $countries = [
-        ['value' => 1, 'label' => 'United States'],
-        ['value' => 2, 'label' => 'United Kingdom'],
-        ['value' => 3, 'label' => 'Canada'],
-        ['value' => 4, 'label' => 'Australia'],
-        ['value' => 5, 'label' => 'Germany'],
-        ['value' => 6, 'label' => 'France'],
-        ['value' => 7, 'label' => 'Italy'],
-        ['value' => 8, 'label' => 'Spain'],
-        ['value' => 9, 'label' => 'Japan'],
-        ['value' => 10, 'label' => 'China'],
-        ['value' => 11, 'label' => 'India'],
-        ['value' => 12, 'label' => 'Brazil'],
-        ['value' => 13, 'label' => 'Mexico'],
-        ['value' => 14, 'label' => 'South Africa'],
-        ['value' => 15, 'label' => 'Nigeria'],
-    ];
+  $countries = [
+    ['value' => 1, 'label' => 'United States'],
+    ['value' => 2, 'label' => 'United Kingdom'],
+    ['value' => 3, 'label' => 'Canada'],
+    ['value' => 4, 'label' => 'Australia'],
+    ['value' => 5, 'label' => 'Germany'],
+    ['value' => 6, 'label' => 'France'],
+    ['value' => 7, 'label' => 'Italy'],
+    ['value' => 8, 'label' => 'Spain'],
+    ['value' => 9, 'label' => 'Japan'],
+    ['value' => 10, 'label' => 'China'],
+    ['value' => 11, 'label' => 'India'],
+    ['value' => 12, 'label' => 'Brazil'],
+    ['value' => 13, 'label' => 'Mexico'],
+    ['value' => 14, 'label' => 'South Africa'],
+    ['value' => 15, 'label' => 'Nigeria'],
+  ];
 
-    if ($search) {
-        $countries = array_filter($countries, function ($country) use ($search) {
-            return stripos($country['label'], $search) !== false;
-        });
-    }
+  if ($search) {
+    $countries = array_filter($countries, function ($country) use ($search) {
+      return stripos($country['label'], $search) !== false;
+    });
+  }
 
-    return response()->json(array_values($countries));
+  return response()->json(array_values($countries));
 });
