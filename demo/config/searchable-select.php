@@ -11,7 +11,7 @@ return [
     |
     */
 
-    'theme' => env('SEARCHABLE_SELECT_THEME', 'bootstrap'),  /*
+    'theme' => env('SEARCHABLE_SELECT_THEME', 'tailwind'),  /*
     |--------------------------------------------------------------------------
     | Bootstrap Version
     |--------------------------------------------------------------------------
