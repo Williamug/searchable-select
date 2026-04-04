@@ -67,7 +67,7 @@ A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 
 ## Requirements
 
 - **PHP**: 8.1 or higher
-- **Laravel**: 9.x, 10.x, 11.x, or 12.x
+- **Laravel**: 9.x, 10.x, 11.x, 12.x, 13.x
 - **Livewire**: 3.x or 4.x
 - **Alpine.js**: Bundled with Livewire (no separate install needed)
 - **CSS Framework** (choose one):
