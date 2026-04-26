@@ -20,7 +20,6 @@
 @php
     $selectedValues = $multiple && is_array($selectedValue) ? $selectedValue : ($selectedValue ? [$selectedValue] : []);
 
-    // Pre-build options array for Alpine.js
     $alpineOptions = [];
     if ($grouped) {
         foreach ($options as $group) {
@@ -47,7 +46,6 @@
         }
     }
 
-    // Build labels map for Alpine
     $labelsMap = [];
     if ($grouped) {
         foreach ($alpineOptions as $group) {
@@ -67,13 +65,12 @@
         display: none !important;
     }
 
-    /* Prevent icon fonts from overriding our symbols */
     .searchable-select-bootstrap * {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     }
 </style>
 
-<div class="searchable-select-bootstrap" x-data="{
+<div class="searchable-select-bootstrap position-relative" x-data="{
     open: false,
     search: '',
     loading: false,
@@ -81,6 +78,10 @@
     multiple: {{ $multiple ? 'true' : 'false' }},
     clearable: {{ $clearable ? 'true' : 'false' }},
     disabled: {{ $disabled ? 'true' : 'false' }},
+    apiUrl: {!! json_encode($apiUrl) !!},
+    apiSearchParam: {!! json_encode($apiSearchParam) !!},
+    optionValueKey: {!! json_encode($optionValue) !!},
+    optionLabelKey: {!! json_encode($optionLabel) !!},
     options: {{ json_encode($alpineOptions) }},
     selectedValues: {{ json_encode(array_map(fn($v) => is_numeric($v) ? (int) $v : $v, $selectedValues)) }},
     labelsMap: {{ json_encode((object) $labelsMap) }},
@@ -117,6 +118,9 @@
         this.$nextTick(() => {
             if (this.$refs.searchInput) this.$refs.searchInput.focus();
         });
+        if (this.apiUrl && this.options.length === 0) {
+            this.searchApi();
+        }
     },
 
     closeDropdown() {
@@ -177,10 +181,10 @@
             } else {
                 this.selectedValues.push(value);
             }
-            $wire.set('{{ $wireModel }}', [...this.selectedValues]);
+            $wire.set({!! json_encode($wireModel) !!}, [...this.selectedValues]);
         } else {
             this.selectedValues = [value];
-            $wire.set('{{ $wireModel }}', value);
+            $wire.set({!! json_encode($wireModel) !!}, value);
             this.closeDropdown();
         }
     },
@@ -189,27 +193,27 @@
         const index = this.selectedValues.indexOf(value);
         if (index > -1) {
             this.selectedValues.splice(index, 1);
-            $wire.set('{{ $wireModel }}', this.multiple ? [...this.selectedValues] : null);
+            $wire.set({!! json_encode($wireModel) !!}, this.multiple ? [...this.selectedValues] : null);
         }
     },
 
     clearAll() {
         this.selectedValues = [];
-        $wire.set('{{ $wireModel }}', this.multiple ? [] : null);
+        $wire.set({!! json_encode($wireModel) !!}, this.multiple ? [] : null);
         this.search = '';
     },
 
     async searchApi() {
-        if (!{{ $apiUrl ? 'true' : 'false' }}) return;
+        if (!this.apiUrl) return;
         this.loading = true;
         try {
-            const url = new URL('{{ $apiUrl }}', window.location.origin);
-            url.searchParams.set('{{ $apiSearchParam }}', this.search);
+            const url = new URL(this.apiUrl, window.location.origin);
+            url.searchParams.set(this.apiSearchParam, this.search);
             const response = await fetch(url);
             const data = await response.json();
             const items = (data.data || data).map(item => ({
-                value: item.{{ $optionValue }},
-                label: item.{{ $optionLabel }}
+                value: item[this.optionValueKey],
+                label: item[this.optionLabelKey]
             }));
             this.options = items;
             items.forEach(item => this.labelsMap[item.value] = item.label);
@@ -219,12 +223,11 @@
             this.loading = false;
         }
     }
-}" @click.away="closeDropdown()" @keydown="handleKeydown"
-    class="position-relative" wire:ignore.self>
+}" @click.outside="closeDropdown()" @keydown="handleKeydown" wire:ignore.self>
 
     {{-- Trigger --}}
     <div @click="toggleDropdown()"
-        {{ $attributes->except(['options', 'wireModel', 'placeholder', 'searchPlaceholder', 'disabled', 'emptyMessage', 'selectedValue', 'optionValue', 'optionLabel', 'multiple', 'clearable', 'apiUrl', 'apiSearchParam', 'grouped', 'groupLabel', 'groupOptions', 'theme'])->merge(['class' => 'form-control']) }}
+        {{ $attributes->except(['options', 'wireModel', 'placeholder', 'searchPlaceholder', 'disabled', 'emptyMessage', 'selectedValue', 'optionValue', 'optionLabel', 'multiple', 'clearable', 'apiUrl', 'apiSearchParam', 'grouped', 'groupLabel', 'groupOptions'])->merge(['class' => 'form-control']) }}
         :class="{
             'disabled opacity-50': disabled,
             'border-primary shadow-sm': open
@@ -291,12 +294,9 @@
     </div>
 
     {{-- Dropdown panel --}}
-    <div x-show="open && !disabled" x-cloak x-transition:enter="transition ease-out duration-100"
-        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-        x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-95"
-        class="dropdown-menu show position-absolute shadow border rounded overflow-hidden w-100 mt-1" role="listbox"
-        :aria-multiselectable="multiple" style="z-index: 1050; display: block;">
+    <div x-show="open && !disabled" x-cloak x-transition
+        class="dropdown-menu show position-absolute shadow border rounded overflow-hidden w-100 mt-1"
+        role="listbox" :aria-multiselectable="multiple" style="z-index: 1050;">
 
         {{-- Search input --}}
         <input type="text" x-ref="searchInput" x-model="search" @input.debounce.300ms="searchApi()" @click.stop
