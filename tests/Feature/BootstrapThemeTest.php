@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\View\ComponentAttributeBag;
+use Williamug\SearchableSelect\View\Components\SearchableSelect;
 
 $bootstrapViewData = function (array $overrides = []) {
     return array_merge([
@@ -51,7 +52,7 @@ it('renders bootstrap view with correct classes', function () use ($bootstrapVie
 it('component class routes to bootstrap view when configured', function () {
     Config::set('searchable-select.theme', 'bootstrap');
 
-    $component = new \Williamug\SearchableSelect\View\Components\SearchableSelect;
+    $component = new SearchableSelect;
 
     expect($component->currentTheme)->toBe('bootstrap');
 });
@@ -59,7 +60,7 @@ it('component class routes to bootstrap view when configured', function () {
 it('component class routes to tailwind view by default', function () {
     Config::set('searchable-select.theme', 'tailwind');
 
-    $component = new \Williamug\SearchableSelect\View\Components\SearchableSelect;
+    $component = new SearchableSelect;
 
     expect($component->currentTheme)->toBe('tailwind');
 });
@@ -67,7 +68,7 @@ it('component class routes to tailwind view by default', function () {
 it('component class accepts theme override', function () {
     Config::set('searchable-select.theme', 'tailwind');
 
-    $component = new \Williamug\SearchableSelect\View\Components\SearchableSelect(theme: 'bootstrap');
+    $component = new SearchableSelect(theme: 'bootstrap');
 
     expect($component->currentTheme)->toBe('bootstrap');
 });
