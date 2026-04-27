@@ -66,8 +66,8 @@ A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 
 
 ## Requirements
 
-- **PHP**: 8.1 or higher
-- **Laravel**: 9.x, 10.x, 11.x, 12.x, 13.x
+- **PHP**: 8.2 or higher
+- **Laravel**: 11.x, 12.x, 13.x
 - **Livewire**: 3.x or 4.x
 - **Alpine.js**: Bundled with Livewire (no separate install needed)
 - **CSS Framework** (choose one):
@@ -164,10 +164,10 @@ return [
     |--------------------------------------------------------------------------
     |
     | The Bootstrap version to target for styling.
-    | Currently supported: '5.3'
+    | Currently supported: '5'
     |
     */
-    'bootstrap_version' => '5.3',
+    'bootstrap_version' => '5',
 ];
 ```
 
@@ -575,7 +575,7 @@ class LocationSelector extends Component
         <label class="block mb-2 font-medium">Country</label>
         <x-searchable-select
             :options="$countries"
-            wire-model.live="country_id"
+            wire-model="country_id"
             :selected-value="$country_id"
             placeholder="Select Country"
             search-placeholder="Search countries..."
@@ -587,7 +587,7 @@ class LocationSelector extends Component
         <label class="block mb-2 font-medium">Region</label>
         <x-searchable-select
             :options="$regions"
-            wire-model.live="region_id"
+            wire-model="region_id"
             :selected-value="$region_id"
             :placeholder="empty($regions) ? 'First select a country' : 'Select Region'"
             :disabled="!$country_id"
@@ -609,8 +609,7 @@ class LocationSelector extends Component
 ```
 
 **Key points:**
-- Use `wire-model.live` on parent dropdowns to trigger updates immediately
-- Use `updatedPropertyName()` methods to react to changes
+- Use `updatedPropertyName()` methods in your Livewire component to react to changes — `$wire.set()` inside the component triggers these automatically on every selection
 - Reset child values when parent changes
 - Use `:disabled` prop to prevent selecting child before parent
 
@@ -788,27 +787,33 @@ public $team_members = []; // Array for multiple selections
 
 **API Response Format:**
 
-Your API should return JSON in this format:
+Your API can return either a wrapped object or a plain array:
 
 ```json
-{
-    "data": [
-        {"id": 1, "name": "John Doe"},
-        {"id": 2, "name": "Jane Smith"},
-        {"id": 3, "name": "Bob Johnson"}
-    ]
-}
+// Wrapped (recommended)
+{ "data": [{"id": 1, "name": "John Doe"}, ...] }
+
+// Plain array also works
+[{"id": 1, "name": "John Doe"}, ...]
 ```
 
 For custom keys, use `option-value` and `option-label`:
 
 ```json
-{
-    "data": [
-        {"user_id": 1, "full_name": "John Doe"},
-        {"user_id": 2, "full_name": "Jane Smith"}
-    ]
-}
+{ "data": [{"user_id": 1, "full_name": "John Doe"}, ...] }
+```
+
+**Auto-fetch on open:**
+
+When `api-url` is set and `options` is empty (`[]`), the component automatically fires an initial API request the first time the dropdown opens — so users see results immediately without needing to type.
+
+```blade
+{{-- Loads options on first open, then filters as the user types --}}
+<x-searchable-select
+    :options="[]"
+    api-url="/api/users"
+    wire-model="user_id"
+/>
 ```
 
 ```blade
@@ -1066,17 +1071,14 @@ You can use both Tailwind and Bootstrap in the same app:
 
 ### Publishing Views
 
-If you need to customize the component HTML:
+If you need to customize the component HTML, copy the view files manually from the package:
 
-```bash
-php artisan vendor:publish --tag=searchable-select-views
+```
+vendor/williamug/searchable-select/resources/views/searchable-select.blade.php
+vendor/williamug/searchable-select/resources/views/searchable-select-bootstrap.blade.php
 ```
 
-This copies the views to `resources/views/vendor/searchable-select/`:
-- `searchable-select.blade.php` - Tailwind version
-- `searchable-select-bootstrap.blade.php` - Bootstrap version
-
-Now you can modify them as needed. Your custom views will be used instead of the package defaults.
+Place your copies in `resources/views/vendor/searchable-select/` and Laravel will use them instead of the package defaults.
 
 ### Dark Mode Support (Tailwind)
 
@@ -1105,7 +1107,7 @@ The component uses client-side filtering by default. To customize:
 
 1. **Case sensitivity**: Modify the Alpine.js `searchTerm` filtering logic
 2. **Search multiple fields**: Adjust the filter to check multiple properties
-3. **Server-side search**: Use `wire-model.live.debounce` with API integration
+3. **Server-side search**: Use the built-in `api-url` prop — the component debounces the API call automatically (300 ms)
 
 ## Troubleshooting
 
@@ -1264,12 +1266,7 @@ php artisan view:clear
 @endforeach
 ```
 
-3. Use `wire-model.live` for immediate updates:
-```blade
-<x-searchable-select
-    wire-model.live="country_id"  {{-- Updates immediately --}}
-/>
-```
+3. Every selection already calls `$wire.set()` immediately — no modifier needed. Ensure your Livewire component has a matching `updated{PropertyName}()` method if you need to react to the change server-side.
 
 #### API integration not working
 
@@ -1374,10 +1371,12 @@ Route::get('/api/search', function (Request $request) {
 });
 ```
 
-3. Use debouncing for search:
+3. Use API mode for large datasets — the built-in search debounces automatically (300 ms):
 ```blade
 <x-searchable-select
-    wire-model.live.debounce.500ms="search"  {{-- Wait 500ms before searching --}}
+    wire-model="selectedId"
+    api-url="/api/items"
+    placeholder="Type to search..."
 />
 ```
 
@@ -1437,10 +1436,13 @@ $this->users = User::all();
 $this->users = User::select('id', 'name')->get();
 ```
 
-**5. Debouncing for Dependent Dropdowns:**
+**5. API mode for large datasets:**
 ```blade
+{{-- Component debounces the API call 300 ms automatically --}}
 <x-searchable-select
-    wire-model.live.debounce.300ms="country_id"  {{-- Debounce API calls --}}
+    api-url="/api/countries"
+    :options="[]"
+    wire-model="country_id"
 />
 ```
 
@@ -1471,10 +1473,9 @@ The package tests include:
 - Single-select functionality
 - Multi-select with badges/tags
 - Grouped options rendering
-- Theme switching and overrides
-- Service provider registration
+- Theme switching and per-component overrides
+- Service provider and component registration
 - Configuration loading
-- Install command
 
 **24 tests, 46 assertions** - all passing
 
@@ -1484,30 +1485,28 @@ The package includes a full-featured demo application showcasing all features.
 
 ### Running the Demo
 
-**With Docker:**
-```bash
-cd demo
-docker-compose up -d
-```
-Visit `http://localhost:8000`
-
-**Without Docker:**
 ```bash
 cd demo
 composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
 php artisan serve
 ```
+
+Visit `http://localhost:8000`
+
+> **Note:** The demo's `composer.json` references the local package via a VCS repository pointing to `../`. No Packagist fetch needed — it installs directly from the local source.
 
 ### Demo Features
 
 The demo includes live examples of:
-- **Basic single-select** - `/`
-- **Multi-select mode** - `/multi-select`
-- **Grouped options** - `/grouped`
-- **API integration** - `/api-demo`
-- **Dependent dropdowns** - `/cascading`
-- **Bootstrap theme** - `/bootstrap`
-- **All features combined** - `/advanced`
+- **Home** — `/`
+- **Basic single-select** — `/basic`
+- **Multi-select** — `/multi-select`
+- **Grouped options** — `/grouped`
+- **API integration** — `/api`
+- **Bootstrap theme** — `/bootstrap`
 
 ### Demo Source Code
 
@@ -1531,11 +1530,14 @@ See the [Dependent/Cascading Dropdowns](#dependentcascading-dropdowns) section f
 
 ### Can I customize the component HTML?
 
-Yes! Publish the views:
-```bash
-php artisan vendor:publish --tag=searchable-select-views
+Yes! Copy the view files from the package into your project:
+
 ```
-Then edit the files in `resources/views/vendor/searchable-select/`.
+vendor/williamug/searchable-select/resources/views/searchable-select.blade.php
+vendor/williamug/searchable-select/resources/views/searchable-select-bootstrap.blade.php
+```
+
+Place them in `resources/views/vendor/searchable-select/` and Laravel will use your copies instead of the package defaults.
 
 ### Does it work with Livewire 3 and 4?
 
