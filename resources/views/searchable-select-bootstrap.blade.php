@@ -70,160 +70,188 @@
     }
 </style>
 
-<div class="searchable-select-bootstrap position-relative" x-data="{
-    open: false,
-    search: '',
-    loading: false,
-    highlightedIndex: -1,
+<script>
+    (function () {
+        if (window.__searchableSelectBootstrapDefined) return;
+        window.__searchableSelectBootstrapDefined = true;
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('searchableSelectBootstrap', (config) => ({
+                open: false,
+                search: '',
+                loading: false,
+                highlightedIndex: -1,
+                multiple: config.multiple ?? false,
+                clearable: config.clearable ?? true,
+                disabled: config.disabled ?? false,
+                apiUrl: config.apiUrl ?? null,
+                apiSearchParam: config.apiSearchParam ?? 'search',
+                optionValueKey: config.optionValueKey ?? 'id',
+                optionLabelKey: config.optionLabelKey ?? 'name',
+                options: config.options ?? [],
+                selectedValues: config.selectedValues ?? [],
+                labelsMap: config.labelsMap ?? {},
+                wireModel: config.wireModel ?? '',
+                grouped: config.grouped ?? false,
+
+                get flatOptions() {
+                    if (this.grouped) {
+                        return this.filteredOptions.flatMap(g => g.items);
+                    }
+                    return this.filteredOptions;
+                },
+
+                get filteredOptions() {
+                    if (!this.search) return this.options;
+                    const query = this.search.toLowerCase();
+                    if (this.grouped) {
+                        return this.options.map(group => ({
+                            ...group,
+                            items: group.items.filter(item => item.label.toLowerCase().includes(query))
+                        })).filter(group => group.items.length > 0);
+                    }
+                    return this.options.filter(opt => opt.label.toLowerCase().includes(query));
+                },
+
+                getLabel(value) {
+                    return this.labelsMap[value] || value;
+                },
+
+                isSelected(value) {
+                    return this.selectedValues.includes(value);
+                },
+
+                openDropdown() {
+                    if (this.disabled) return;
+                    this.open = true;
+                    this.highlightedIndex = -1;
+                    this.$nextTick(() => {
+                        if (this.$refs.searchInput) this.$refs.searchInput.focus();
+                    });
+                    if (this.apiUrl && this.options.length === 0) {
+                        this.searchApi();
+                    }
+                },
+
+                closeDropdown() {
+                    this.open = false;
+                    this.search = '';
+                    this.highlightedIndex = -1;
+                },
+
+                toggleDropdown() {
+                    this.open ? this.closeDropdown() : this.openDropdown();
+                },
+
+                handleKeydown(e) {
+                    if (!this.open) {
+                        if (['Enter', ' ', 'ArrowDown'].includes(e.key)) {
+                            e.preventDefault();
+                            this.openDropdown();
+                        }
+                        return;
+                    }
+                    const opts = this.flatOptions;
+                    switch (e.key) {
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            this.highlightedIndex = (this.highlightedIndex + 1) % opts.length;
+                            this.scrollToHighlighted();
+                            break;
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            this.highlightedIndex = this.highlightedIndex <= 0 ? opts.length - 1 : this.highlightedIndex - 1;
+                            this.scrollToHighlighted();
+                            break;
+                        case 'Enter':
+                            e.preventDefault();
+                            if (this.highlightedIndex >= 0 && this.highlightedIndex < opts.length) {
+                                this.toggleSelection(opts[this.highlightedIndex].value);
+                            }
+                            break;
+                        case 'Escape':
+                            e.preventDefault();
+                            this.closeDropdown();
+                            break;
+                    }
+                },
+
+                scrollToHighlighted() {
+                    this.$nextTick(() => {
+                        const el = this.$refs.optionsList?.querySelector('[data-highlighted=true]');
+                        if (el) el.scrollIntoView({ block: 'nearest' });
+                    });
+                },
+
+                toggleSelection(value) {
+                    if (this.multiple) {
+                        const index = this.selectedValues.indexOf(value);
+                        if (index > -1) {
+                            this.selectedValues.splice(index, 1);
+                        } else {
+                            this.selectedValues.push(value);
+                        }
+                        $wire.set(this.wireModel, [...this.selectedValues]);
+                    } else {
+                        this.selectedValues = [value];
+                        $wire.set(this.wireModel, value);
+                        this.closeDropdown();
+                    }
+                },
+
+                removeSelection(value) {
+                    const index = this.selectedValues.indexOf(value);
+                    if (index > -1) {
+                        this.selectedValues.splice(index, 1);
+                        $wire.set(this.wireModel, this.multiple ? [...this.selectedValues] : null);
+                    }
+                },
+
+                clearAll() {
+                    this.selectedValues = [];
+                    $wire.set(this.wireModel, this.multiple ? [] : null);
+                    this.search = '';
+                },
+
+                async searchApi() {
+                    if (!this.apiUrl) return;
+                    this.loading = true;
+                    try {
+                        const url = new URL(this.apiUrl, window.location.origin);
+                        url.searchParams.set(this.apiSearchParam, this.search);
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        const items = (data.data || data).map(item => ({
+                            value: item[this.optionValueKey],
+                            label: item[this.optionLabelKey]
+                        }));
+                        this.options = items;
+                        items.forEach(item => this.labelsMap[item.value] = item.label);
+                    } catch (error) {
+                        console.error('Search failed:', error);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }));
+        });
+    })();
+</script>
+
+<div class="searchable-select-bootstrap position-relative" x-data="searchableSelectBootstrap({
     multiple: {{ $multiple ? 'true' : 'false' }},
     clearable: {{ $clearable ? 'true' : 'false' }},
     disabled: {{ $disabled ? 'true' : 'false' }},
-    apiUrl: {!! json_encode($apiUrl) !!},
-    apiSearchParam: {!! json_encode($apiSearchParam) !!},
-    optionValueKey: {!! json_encode($optionValue) !!},
-    optionLabelKey: {!! json_encode($optionLabel) !!},
-    options: {{ json_encode($alpineOptions) }},
-    selectedValues: {{ json_encode(array_map(fn($v) => is_numeric($v) ? (int) $v : $v, $selectedValues)) }},
-    labelsMap: {{ json_encode((object) $labelsMap) }},
-
-    get flatOptions() {
-        @if ($grouped) return this.filteredOptions.flatMap(g => g.items);
-        @else
-            return this.filteredOptions; @endif
-    },
-
-    get filteredOptions() {
-        if (!this.search) return this.options;
-        const query = this.search.toLowerCase();
-        @if ($grouped) return this.options.map(group => ({
-                ...group,
-                items: group.items.filter(item => item.label.toLowerCase().includes(query))
-            })).filter(group => group.items.length > 0);
-        @else
-            return this.options.filter(opt => opt.label.toLowerCase().includes(query)); @endif
-    },
-
-    getLabel(value) {
-        return this.labelsMap[value] || value;
-    },
-
-    isSelected(value) {
-        return this.selectedValues.includes(value);
-    },
-
-    openDropdown() {
-        if (this.disabled) return;
-        this.open = true;
-        this.highlightedIndex = -1;
-        this.$nextTick(() => {
-            if (this.$refs.searchInput) this.$refs.searchInput.focus();
-        });
-        if (this.apiUrl && this.options.length === 0) {
-            this.searchApi();
-        }
-    },
-
-    closeDropdown() {
-        this.open = false;
-        this.search = '';
-        this.highlightedIndex = -1;
-    },
-
-    toggleDropdown() {
-        this.open ? this.closeDropdown() : this.openDropdown();
-    },
-
-    handleKeydown(e) {
-        if (!this.open) {
-            if (['Enter', ' ', 'ArrowDown'].includes(e.key)) {
-                e.preventDefault();
-                this.openDropdown();
-            }
-            return;
-        }
-        const opts = this.flatOptions;
-        switch (e.key) {
-            case 'ArrowDown':
-                e.preventDefault();
-                this.highlightedIndex = (this.highlightedIndex + 1) % opts.length;
-                this.scrollToHighlighted();
-                break;
-            case 'ArrowUp':
-                e.preventDefault();
-                this.highlightedIndex = this.highlightedIndex <= 0 ? opts.length - 1 : this.highlightedIndex - 1;
-                this.scrollToHighlighted();
-                break;
-            case 'Enter':
-                e.preventDefault();
-                if (this.highlightedIndex >= 0 && this.highlightedIndex < opts.length) {
-                    this.toggleSelection(opts[this.highlightedIndex].value);
-                }
-                break;
-            case 'Escape':
-                e.preventDefault();
-                this.closeDropdown();
-                break;
-        }
-    },
-
-    scrollToHighlighted() {
-        this.$nextTick(() => {
-            const el = this.$refs.optionsList?.querySelector('[data-highlighted=true]');
-            if (el) el.scrollIntoView({ block: 'nearest' });
-        });
-    },
-
-    toggleSelection(value) {
-        if (this.multiple) {
-            const index = this.selectedValues.indexOf(value);
-            if (index > -1) {
-                this.selectedValues.splice(index, 1);
-            } else {
-                this.selectedValues.push(value);
-            }
-            $wire.set({!! json_encode($wireModel) !!}, [...this.selectedValues]);
-        } else {
-            this.selectedValues = [value];
-            $wire.set({!! json_encode($wireModel) !!}, value);
-            this.closeDropdown();
-        }
-    },
-
-    removeSelection(value) {
-        const index = this.selectedValues.indexOf(value);
-        if (index > -1) {
-            this.selectedValues.splice(index, 1);
-            $wire.set({!! json_encode($wireModel) !!}, this.multiple ? [...this.selectedValues] : null);
-        }
-    },
-
-    clearAll() {
-        this.selectedValues = [];
-        $wire.set({!! json_encode($wireModel) !!}, this.multiple ? [] : null);
-        this.search = '';
-    },
-
-    async searchApi() {
-        if (!this.apiUrl) return;
-        this.loading = true;
-        try {
-            const url = new URL(this.apiUrl, window.location.origin);
-            url.searchParams.set(this.apiSearchParam, this.search);
-            const response = await fetch(url);
-            const data = await response.json();
-            const items = (data.data || data).map(item => ({
-                value: item[this.optionValueKey],
-                label: item[this.optionLabelKey]
-            }));
-            this.options = items;
-            items.forEach(item => this.labelsMap[item.value] = item.label);
-        } catch (error) {
-            console.error('Search failed:', error);
-        } finally {
-            this.loading = false;
-        }
-    }
-}" @click.outside="closeDropdown()" @keydown="handleKeydown" wire:ignore.self>
+    apiUrl: {{ json_encode($apiUrl) }},
+    apiSearchParam: {{ json_encode($apiSearchParam) }},
+    optionValueKey: {{ json_encode($optionValue) }},
+    optionLabelKey: {{ json_encode($optionLabel) }},
+    options: {!! json_encode($alpineOptions) !!},
+    selectedValues: {!! json_encode(array_map(fn($v) => is_numeric($v) ? (int) $v : $v, $selectedValues)) !!},
+    labelsMap: {!! json_encode((object) $labelsMap) !!},
+    wireModel: {{ json_encode($wireModel) }},
+    grouped: {{ $grouped ? 'true' : 'false' }}
+})" @click.outside="closeDropdown()" @keydown="handleKeydown" wire:ignore.self>
 
     {{-- Trigger --}}
     <div @click="toggleDropdown()"
