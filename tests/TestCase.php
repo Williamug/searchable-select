@@ -3,6 +3,7 @@
 namespace Williamug\SearchableSelect\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Williamug\SearchableSelect\SearchableSelectServiceProvider;
 
@@ -21,7 +22,7 @@ class TestCase extends Orchestra
     {
         return [
             SearchableSelectServiceProvider::class,
-            \Livewire\LivewireServiceProvider::class,
+            LivewireServiceProvider::class,
         ];
     }
 
