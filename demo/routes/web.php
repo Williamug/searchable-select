@@ -1,18 +1,22 @@
 <?php
 
+use App\Livewire\ApiExample;
+use App\Livewire\BasicExample;
+use App\Livewire\GroupedExample;
+use App\Livewire\MultiSelectExample;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('demo');
 });
 
-Route::get('/basic', App\Livewire\BasicExample::class);
+Route::get('/basic', BasicExample::class);
 
-Route::get('/multi-select', App\Livewire\MultiSelectExample::class);
+Route::get('/multi-select', MultiSelectExample::class);
 
-Route::get('/grouped', App\Livewire\GroupedExample::class);
+Route::get('/grouped', GroupedExample::class);
 
-Route::get('/api', App\Livewire\ApiExample::class);
+Route::get('/api', ApiExample::class);
 
 Route::get('/bootstrap', function () {
     return view('bootstrap-demo');

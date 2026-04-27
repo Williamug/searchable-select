@@ -123,6 +123,22 @@
                     </a>
                 </div>
 
+                <!-- Bootstrap Theme Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border-l-4 border-purple-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-900">Bootstrap Theme</h2>
+                        <span class="text-xs bg-purple-100 text-purple-700 font-medium px-2 py-1 rounded">New</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">Single, multi-select, grouped, disabled, and API examples — all with Bootstrap 5 styling.</p>
+                    <a href="/bootstrap" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        View Demo
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </a>
+                </div>
+
                 <!-- Documentation Card -->
                 <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                     <div class="flex items-center justify-between mb-4">

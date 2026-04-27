@@ -36,6 +36,8 @@
                         class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 {{ request()->is('grouped') ? 'bg-gray-100 font-semibold' : '' }}">Grouped</a>
                     <a href="/api"
                         class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 {{ request()->is('api') ? 'bg-gray-100 font-semibold' : '' }}">API</a>
+                    <a href="/bootstrap"
+                        class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 {{ request()->is('bootstrap') ? 'bg-gray-100 font-semibold' : '' }}">Bootstrap</a>
                 </div>
             </div>
         </nav>
