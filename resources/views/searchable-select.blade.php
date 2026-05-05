@@ -72,7 +72,7 @@
         if (window.__searchableSelectDefined) return;
         window.__searchableSelectDefined = true;
 
-        document.addEventListener('alpine:init', () => {
+        function registerSearchableSelect() {
             Alpine.data('searchableSelect', (config) => ({
                 open: false,
                 search: '',
@@ -231,7 +231,13 @@
                     }
                 }
             }));
-        });
+        }
+
+        if (window.Alpine) {
+            registerSearchableSelect();
+        } else {
+            document.addEventListener('alpine:init', registerSearchableSelect);
+        }
     })();
 </script>
 
