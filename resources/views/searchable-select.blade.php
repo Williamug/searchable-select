@@ -67,13 +67,12 @@
     }
 </style>
 
+@once
+@push('scripts')
 <script>
-    (function () {
-        if (window.__searchableSelectDefined) return;
-        window.__searchableSelectDefined = true;
-
-        function registerSearchableSelect() {
-            Alpine.data('searchableSelect', (config) => ({
+    if (!window.searchableSelect) {
+        window.searchableSelect = function (config) {
+            return {
                 open: false,
                 search: '',
                 loading: false,
@@ -230,16 +229,12 @@
                         this.loading = false;
                     }
                 }
-            }));
-        }
-
-        if (window.Alpine) {
-            registerSearchableSelect();
-        } else {
-            document.addEventListener('alpine:init', registerSearchableSelect);
-        }
-    })();
+            };
+        };
+    }
 </script>
+@endpush
+@endonce
 
 <div x-data="searchableSelect({
     multiple: {{ $multiple ? 'true' : 'false' }},

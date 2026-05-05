@@ -70,13 +70,12 @@
     }
 </style>
 
+@once
+@push('scripts')
 <script>
-    (function () {
-        if (window.__searchableSelectBootstrapDefined) return;
-        window.__searchableSelectBootstrapDefined = true;
-
-        function registerSearchableSelectBootstrap() {
-            Alpine.data('searchableSelectBootstrap', (config) => ({
+    if (!window.searchableSelectBootstrap) {
+        window.searchableSelectBootstrap = function (config) {
+            return {
                 open: false,
                 search: '',
                 loading: false,
@@ -233,16 +232,12 @@
                         this.loading = false;
                     }
                 }
-            }));
-        }
-
-        if (window.Alpine) {
-            registerSearchableSelectBootstrap();
-        } else {
-            document.addEventListener('alpine:init', registerSearchableSelectBootstrap);
-        }
-    })();
+            };
+        };
+    }
 </script>
+@endpush
+@endonce
 
 <div class="searchable-select-bootstrap position-relative" x-data="searchableSelectBootstrap({
     multiple: {{ $multiple ? 'true' : 'false' }},
