@@ -75,7 +75,7 @@
         if (window.__searchableSelectBootstrapDefined) return;
         window.__searchableSelectBootstrapDefined = true;
 
-        document.addEventListener('alpine:init', () => {
+        function registerSearchableSelectBootstrap() {
             Alpine.data('searchableSelectBootstrap', (config) => ({
                 open: false,
                 search: '',
@@ -234,7 +234,13 @@
                     }
                 }
             }));
-        });
+        }
+
+        if (window.Alpine) {
+            registerSearchableSelectBootstrap();
+        } else {
+            document.addEventListener('alpine:init', registerSearchableSelectBootstrap);
+        }
     })();
 </script>
 
