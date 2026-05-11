@@ -51,4 +51,4 @@ Route::get('/api/countries', function () {
     }
 
     return response()->json(array_values($countries));
-});
+})->middleware('throttle:60,1');
