@@ -5,58 +5,40 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'Searchable Select Demo' }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
 
-<body class="bg-gray-50">
-    <div class="min-h-screen">
-        <!-- Header -->
-        <header class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h1 class="text-3xl font-bold text-gray-900">Searchable Select Component</h1>
-                        <p class="mt-2 text-gray-600">Beautiful, searchable dropdown for Laravel Livewire</p>
-                    </div>
-                    <a href="/" class="text-blue-600 hover:text-blue-800">← Back to Home</a>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+
+    <header class="bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">williamug/searchable-select</h1>
+                    <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                        Alpine.js + Tailwind · Livewire 3 &amp; 4 · No wire:ignore
+                    </p>
                 </div>
+                <a
+                    href="https://github.com/williamug/searchable-select"
+                    class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                    target="_blank"
+                    rel="noopener"
+                >GitHub →</a>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <!-- Navigation -->
-        <nav class="bg-white border-b">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex space-x-8 py-4">
-                    <a href="/basic"
-                        class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 {{ request()->is('basic') ? 'bg-gray-100 font-semibold' : '' }}">Basic</a>
-                    <a href="/multi-select"
-                        class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 {{ request()->is('multi-select') ? 'bg-gray-100 font-semibold' : '' }}">Multi-Select</a>
-                    <a href="/grouped"
-                        class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 {{ request()->is('grouped') ? 'bg-gray-100 font-semibold' : '' }}">Grouped</a>
-                    <a href="/api"
-                        class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 {{ request()->is('api') ? 'bg-gray-100 font-semibold' : '' }}">API</a>
-                    <a href="/bootstrap"
-                        class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 {{ request()->is('bootstrap') ? 'bg-gray-100 font-semibold' : '' }}">Bootstrap</a>
-                </div>
-            </div>
-        </nav>
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+        {{ $slot }}
+    </main>
 
-        <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            {{ $slot }}
-        </main>
-
-        <!-- Footer -->
-        <footer class="bg-white border-t mt-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <p class="text-center text-gray-600">
-                    Built with ❤️ by <a href="https://github.com/williamug"
-                        class="text-blue-600 hover:text-blue-800">William Asaba</a>
-                </p>
-            </div>
-        </footer>
-    </div>
+    <footer class="border-t border-gray-200 dark:border-zinc-700 mt-16">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+            Built by <a href="https://github.com/williamug" class="text-blue-600 dark:text-blue-400 hover:underline">William Asaba</a>
+        </div>
+    </footer>
 
     @livewireScripts
 </body>
