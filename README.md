@@ -6,17 +6,14 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/williamug/searchable-select.svg?style=flat-square)](https://packagist.org/packages/williamug/searchable-select)
 [![License](https://img.shields.io/packagist/l/williamug/searchable-select.svg?style=flat-square)](https://packagist.org/packages/williamug/searchable-select)
 
-A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 4 applications. Built with Alpine.js and supports both **Tailwind CSS** and **Bootstrap 5** out of the box!
+A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 4 applications. Built with Alpine.js and styled with Tailwind CSS.
 
 ## Table of Contents
 
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [CSS Framework Setup](#css-framework-setup)
-  - [Tailwind CSS (Default)](#tailwind-css-default)
-  - [Bootstrap 5](#bootstrap-5)
-  - [Switching Themes](#switching-themes)
+- [Tailwind CSS Setup](#tailwind-css-setup)
 - [Quick Start](#quick-start)
 - [Component Props Reference](#component-props-reference)
 - [Usage Examples](#usage-examples)
@@ -24,7 +21,6 @@ A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 
   - [Multi-Select](#multi-select)
   - [Dependent/Cascading Dropdowns](#dependentcascading-dropdowns)
   - [Grouped Options](#grouped-options)
-  - [API/Ajax Integration](#apiajax-integration)
   - [Custom Keys](#custom-keys)
   - [With Validation](#with-validation)
   - [Disabled State](#disabled-state)
@@ -42,18 +38,15 @@ A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 
 
 - **Real-time search** - Client-side filtering as you type
 - **Multi-select support** - Select multiple options with visual tags/badges
-- **Ajax/API integration** - Fetch options dynamically from REST endpoints
 - **Grouped options** - Organize options into labeled categories
 - **Clear button** - Quickly clear selections
-- **Dark mode support** - Automatically adapts to your theme (Tailwind)
+- **Dark mode support** - Automatically adapts to your theme
 - **Accessible** - Full keyboard navigation and ARIA attributes
 - **Livewire 3 & 4 compatible** - Works seamlessly with both versions
 - **Responsive** - Mobile-friendly and touch-optimized
 - **Disabled state** - Conditional disabling support
 - **Flexible data** - Works with Eloquent models, arrays, collections
 - **Dependent dropdowns** - Perfect for cascading country → region → city selects
-- **Multiple CSS frameworks** - Full support for Tailwind CSS and Bootstrap 5
-- **Per-component theme override** - Mix frameworks in the same app
 - **Customizable** - Override styles and behavior
 - **Zero config** - Works immediately after installation
 
@@ -70,9 +63,7 @@ A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 
 - **Laravel**: 11.x, 12.x, 13.x
 - **Livewire**: 3.x or 4.x
 - **Alpine.js**: Bundled with Livewire (no separate install needed)
-- **CSS Framework** (choose one):
-  - Tailwind CSS 3.x+ (default)
-  - Bootstrap 5.x+
+- **Tailwind CSS**: 3.x+
 
 ## Installation
 
@@ -84,17 +75,13 @@ composer require williamug/searchable-select
 
 The package will automatically register its service provider. You're ready to use it immediately!
 
-You can publish the configuration file:
+You can publish the view files if you need to customize the component HTML:
 
 ```bash
-php artisan vendor:publish --tag=searchable-select-config
+php artisan vendor:publish --tag=searchable-select-views
 ```
 
-## CSS Framework Setup
-
-### Tailwind CSS (Default)
-
-The component uses **Tailwind CSS** by default. No additional configuration needed!
+## Tailwind CSS Setup
 
 **1. Ensure Tailwind is installed in your project:**
 
@@ -126,140 +113,6 @@ npm run build
 ```
 
 That's it! The component will use Tailwind classes and support dark mode automatically.
-
-### Bootstrap 5
-
-To use **Bootstrap 5** instead of Tailwind:
-
-**1. Publish the configuration file:**
-
-```bash
-php artisan vendor:publish --tag=searchable-select-config
-```
-
-This creates `config/searchable-select.php`.
-
-**2. Set the theme to Bootstrap:**
-
-Edit `config/searchable-select.php`:
-
-```php
-<?php
-
-return [
-    /*
-    |--------------------------------------------------------------------------
-    | Default Theme
-    |--------------------------------------------------------------------------
-    |
-    | The default CSS framework to use for rendering components.
-    | Supported values: 'tailwind', 'bootstrap'
-    |
-    */
-    'theme' => 'bootstrap', // Change from 'tailwind' to 'bootstrap'
-
-    /*
-    |--------------------------------------------------------------------------
-    | Bootstrap Version
-    |--------------------------------------------------------------------------
-    |
-    | The Bootstrap version to target for styling.
-    | Currently supported: '5'
-    |
-    */
-    'bootstrap_version' => '5',
-];
-```
-
-**Or use environment variable** (recommended):
-
-Add to your `.env` file:
-
-```env
-SEARCHABLE_SELECT_THEME=bootstrap
-```
-
-**3. Include Bootstrap assets in your layout if you haven't already:**
-
-Add to your `resources/views/layouts/app.blade.php` (or wherever your layout is):
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My App</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    @livewireStyles
-</head>
-<body>
-    @yield('content')
-
-    <!-- Bootstrap Bundle with Popper (optional, for dropdowns/tooltips) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    @livewireScripts
-</body>
-</html>
-```
-
-**Note**: The component's dropdown functionality uses Alpine.js (included with Livewire), so Bootstrap's JavaScript is optional unless you're using other Bootstrap components.
-
-### Switching Themes
-
-#### Global Theme Switch
-
-Change the theme application-wide by updating `config/searchable-select.php`:
-
-```php
-'theme' => 'tailwind', // or 'bootstrap'
-```
-
-Or via environment variable:
-
-```env
-# Use Tailwind globally
-SEARCHABLE_SELECT_THEME=tailwind
-
-# Use Bootstrap globally
-SEARCHABLE_SELECT_THEME=bootstrap
-```
-
-#### Per-Component Theme Override
-
-You can override the theme for **individual components** using the `theme` prop:
-
-```blade
-{{-- This component uses Bootstrap --}}
-<x-searchable-select
-    theme="bootstrap"
-    :options="$countries"
-    wire-model="country_id"
-/>
-
-{{-- This component uses Tailwind --}}
-<x-searchable-select
-    theme="tailwind"
-    :options="$cities"
-    wire-model="city_id"
-/>
-
-{{-- This uses the global config theme --}}
-<x-searchable-select
-    :options="$regions"
-    wire-model="region_id"
-/>
-```
-
-This allows you to:
-- Gradually migrate from one framework to another
-- Mix frameworks in the same application
-- Use different themes for different sections of your app
-
 
 ## Quick Start
 
@@ -315,9 +168,8 @@ class ContactForm extends Component
     <label for="country" class="block mb-2">Country</label>
 
     <x-searchable-select
+        wire:model="country_id"
         :options="$countries"
-        wire-model="country_id"
-        :selected-value="$country_id"
         placeholder="Select a country"
         search-placeholder="Type to search countries..."
     />
@@ -330,7 +182,7 @@ class ContactForm extends Component
 </div>
 ```
 
-That's it! You now have a fully functional searchable dropdown.
+That's it! You now have a fully functional searchable dropdown. The component automatically syncs with your Livewire property via `wire:model` — no extra `:selected-value` prop needed.
 
 ## Component Props Reference
 
@@ -339,8 +191,6 @@ Comprehensive list of all available props:
 | Prop | Type | Default | Required | Description |
 |------|------|---------|----------|-------------|
 | `options` | Array/Collection | `[]` | Yes | The list of options to display in the dropdown |
-| `wireModel` | String | `''` | Yes | The Livewire property to bind the selected value to |
-| `selectedValue` | Mixed | `null` | No | The currently selected value (for reactivity) |
 | `placeholder` | String | `'Select option'` | No | Placeholder text shown when nothing is selected |
 | `searchPlaceholder` | String | `'Search...'` | No | Placeholder for the search input field |
 | `disabled` | Boolean | `false` | No | Whether the dropdown is disabled |
@@ -349,12 +199,11 @@ Comprehensive list of all available props:
 | `optionLabel` | String | `'name'` | No | The key/property to use as the option display label |
 | `multiple` | Boolean | `false` | No | Enable multi-select mode (allows selecting multiple options) |
 | `clearable` | Boolean | `true` | No | Show/hide the clear button |
-| `apiUrl` | String | `null` | No | API endpoint URL for fetching options dynamically |
-| `apiSearchParam` | String | `'search'` | No | Query parameter name for API search (e.g., `?search=term`) |
 | `grouped` | Boolean | `false` | No | Enable grouped/categorized options mode |
 | `groupLabel` | String | `'label'` | No | Key for group labels (when `grouped` is true) |
 | `groupOptions` | String | `'options'` | No | Key for group options array (when `grouped` is true) |
-| `theme` | String | `null` | No | Override the CSS framework theme (`'tailwind'` or `'bootstrap'`) |
+
+> **`wire:model`** is a standard Livewire directive, not a declared prop. Pass it as `wire:model="propertyName"` and the component handles two-way binding automatically.
 
 ### Props Explanation
 
@@ -365,9 +214,7 @@ Comprehensive list of all available props:
   - Array of objects: `[['id' => 1, 'name' => 'USA'], ...]`
   - Array of arrays: See above
 
-- **`wireModel`**: The Livewire property name to bind. Use `wire-model` (kebab-case) in Blade.
-
-- **`selectedValue`**: Pass the current value to keep the component in sync. Essential for reactive updates.
+- **`wire:model`**: The Livewire property to bind to. The component uses `$wire.entangle()` internally to keep the selected value in sync automatically.
 
 #### Labeling Props
 
@@ -377,7 +224,7 @@ Comprehensive list of all available props:
 
 #### Data Mapping Props
 
-- **`optionValue`**: Which property to use as the value (saved to `wire-model`)
+- **`optionValue`**: Which property to use as the value (saved to `wire:model`)
 - **`optionLabel`**: Which property to display to users
 
 Example:
@@ -388,10 +235,10 @@ $countries = Country::all(); // [['code' => 'US', 'country_name' => 'United Stat
 
 ```blade
 <x-searchable-select
+    wire:model="country_code"
     :options="$countries"
     option-value="code"
     option-label="country_name"
-    wire-model="country_code"
 />
 ```
 
@@ -401,17 +248,6 @@ $countries = Country::all(); // [['code' => 'US', 'country_name' => 'United Stat
 - **`clearable`**: Shows/hides the × button to clear selection
 - **`disabled`**: Grays out the component and prevents interaction
 - **`grouped`**: Enables category headers in the dropdown
-
-#### API Integration Props
-
-- **`apiUrl`**: Backend endpoint that returns JSON with options
-- **`apiSearchParam`**: The query parameter for search term
-
-See [API/Ajax Integration](#apiajax-integration) for full examples.
-
-#### Theme Props
-
-- **`theme`**: Override the global theme setting for this specific component
 
 
 ## Usage Examples
@@ -447,9 +283,8 @@ class UserProfile extends Component
 
 ```blade
 <x-searchable-select
+    wire:model="country_id"
     :options="$countries"
-    wire-model="country_id"
-    :selected-value="$country_id"
     placeholder="Select your country"
     search-placeholder="Search countries..."
 />
@@ -486,9 +321,8 @@ class UserSkills extends Component
 
 ```blade
 <x-searchable-select
+    wire:model="selected_skills"
     :options="$skills"
-    wire-model="selected_skills"
-    :selected-value="$selected_skills"
     :multiple="true"
     placeholder="Select your skills"
     search-placeholder="Search skills..."
@@ -502,9 +336,7 @@ class UserSkills extends Component
 @endif
 ```
 
-**Tailwind styling**: Selected items show as blue badges with × remove buttons
-**Bootstrap styling**: Selected items show as primary badges with × remove buttons
-
+Selected items show as blue badges with × remove buttons.
 
 
 ### Dependent/Cascading Dropdowns
@@ -574,9 +406,8 @@ class LocationSelector extends Component
     <div>
         <label class="block mb-2 font-medium">Country</label>
         <x-searchable-select
+            wire:model="country_id"
             :options="$countries"
-            wire-model="country_id"
-            :selected-value="$country_id"
             placeholder="Select Country"
             search-placeholder="Search countries..."
         />
@@ -586,9 +417,8 @@ class LocationSelector extends Component
     <div>
         <label class="block mb-2 font-medium">Region</label>
         <x-searchable-select
+            wire:model="region_id"
             :options="$regions"
-            wire-model="region_id"
-            :selected-value="$region_id"
             :placeholder="empty($regions) ? 'First select a country' : 'Select Region'"
             :disabled="!$country_id"
         />
@@ -598,9 +428,8 @@ class LocationSelector extends Component
     <div>
         <label class="block mb-2 font-medium">City</label>
         <x-searchable-select
+            wire:model="city_id"
             :options="$cities"
-            wire-model="city_id"
-            :selected-value="$city_id"
             :placeholder="empty($cities) ? 'First select a region' : 'Select City'"
             :disabled="!$region_id"
         />
@@ -667,9 +496,8 @@ class CountrySelector extends Component
 
 ```blade
 <x-searchable-select
+    wire:model="country_id"
     :options="$locations"
-    wire-model="country_id"
-    :selected-value="$country_id"
     :grouped="true"
     placeholder="Select a country"
     search-placeholder="Search countries..."
@@ -694,134 +522,13 @@ public $categories = [
 
 ```blade
 <x-searchable-select
+    wire:model="selected_item"
     :options="$categories"
     :grouped="true"
     group-label="category_name"
     group-options="items"
     option-value="code"
     option-label="title"
-    wire-model="selected_item"
-/>
-```
-
-### API/Ajax Integration
-
-Fetch options dynamically from a backend API:
-
-**Step 1: Create an API endpoint**
-
-```php
-// routes/api.php
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-
-Route::get('/users/search', function (Request $request) {
-    $query = User::query();
-
-    // Search by the query parameter
-    if ($request->has('search')) {
-        $search = $request->input('search');
-        $query->where('name', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%");
-    }
-
-    $users = $query->select('id', 'name')
-                   ->limit(50)
-                   ->get();
-
-    return response()->json([
-        'data' => $users
-    ]);
-});
-```
-
-**Step 2: Use the component with API URL**
-
-```php
-<?php
-
-namespace App\Livewire;
-
-use Livewire\Component;
-
-class AssignTask extends Component
-{
-    public $assigned_user_id;
-
-    public function render()
-    {
-        return view('livewire.assign-task');
-    }
-}
-```
-
-```blade
-<x-searchable-select
-    :options="[]"
-    wire-model="assigned_user_id"
-    :selected-value="$assigned_user_id"
-    api-url="{{ route('api.users.search') }}"
-    api-search-param="search"
-    placeholder="Search for a user..."
-    search-placeholder="Type to search users..."
-/>
-```
-
-**Multi-select with API:**
-
-```php
-public $team_members = []; // Array for multiple selections
-```
-
-```blade
-<x-searchable-select
-    :options="[]"
-    wire-model="team_members"
-    :selected-value="$team_members"
-    :multiple="true"
-    api-url="{{ route('api.users.search') }}"
-    placeholder="Add team members"
-/>
-```
-
-**API Response Format:**
-
-Your API can return either a wrapped object or a plain array:
-
-```json
-// Wrapped (recommended)
-{ "data": [{"id": 1, "name": "John Doe"}, ...] }
-
-// Plain array also works
-[{"id": 1, "name": "John Doe"}, ...]
-```
-
-For custom keys, use `option-value` and `option-label`:
-
-```json
-{ "data": [{"user_id": 1, "full_name": "John Doe"}, ...] }
-```
-
-**Auto-fetch on open:**
-
-When `api-url` is set and `options` is empty (`[]`), the component automatically fires an initial API request the first time the dropdown opens — so users see results immediately without needing to type.
-
-```blade
-{{-- Loads options on first open, then filters as the user types --}}
-<x-searchable-select
-    :options="[]"
-    api-url="/api/users"
-    wire-model="user_id"
-/>
-```
-
-```blade
-<x-searchable-select
-    api-url="/api/users"
-    option-value="user_id"
-    option-label="full_name"
-    wire-model="user_id"
 />
 ```
 
@@ -841,9 +548,8 @@ public $selected_sku;
 
 ```blade
 <x-searchable-select
+    wire:model="selected_sku"
     :options="$products"
-    wire-model="selected_sku"
-    :selected-value="$selected_sku"
     option-value="sku"
     option-label="product_name"
     placeholder="Select a product"
@@ -901,9 +607,8 @@ class ContactForm extends Component
 <div>
     <label>Country *</label>
     <x-searchable-select
+        wire:model="country_id"
         :options="$countries"
-        wire-model="country_id"
-        :selected-value="$country_id"
     />
     @error('country_id')
         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -913,9 +618,8 @@ class ContactForm extends Component
 <div class="mt-4">
     <label>City *</label>
     <x-searchable-select
+        wire:model="city_id"
         :options="$cities"
-        wire-model="city_id"
-        :selected-value="$city_id"
     />
     @error('city_id')
         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -940,9 +644,8 @@ Conditionally disable the dropdown:
 
 ```blade
 <x-searchable-select
+    wire:model="region_id"
     :options="$regions"
-    wire-model="region_id"
-    :selected-value="$region_id"
     :disabled="!$country_id"
     placeholder="First select a country"
 />
@@ -954,9 +657,8 @@ Hide the clear (×) button:
 
 ```blade
 <x-searchable-select
+    wire:model="country_id"
     :options="$countries"
-    wire-model="country_id"
-    :selected-value="$country_id"
     :clearable="false"
 />
 ```
@@ -975,9 +677,8 @@ public $statuses = [
 
 ```blade
 <x-searchable-select
+    wire:model="status"
     :options="$statuses"
-    wire-model="status"
-    :selected-value="$status"
 />
 ```
 
@@ -987,22 +688,11 @@ public $statuses = [
 
 Add custom classes to the component wrapper:
 
-**Tailwind:**
 ```blade
 <x-searchable-select
+    wire:model="country_id"
     :options="$countries"
-    wire-model="country_id"
     class="border-2 border-blue-500 rounded-xl shadow-lg"
-/>
-```
-
-**Bootstrap:**
-```blade
-<x-searchable-select
-    theme="bootstrap"
-    :options="$countries"
-    wire-model="country_id"
-    class="shadow-sm border-primary"
 />
 ```
 
@@ -1012,12 +702,11 @@ Build reusable components for common patterns:
 
 **resources/views/components/country-select.blade.php:**
 ```blade
-@props(['wireModel', 'selectedValue' => null])
+@props(['wireModel'])
 
 <x-searchable-select
+    wire:model="{{ $wireModel }}"
     :options="\App\Models\Country::orderBy('name')->get()"
-    wire-model="{{ $wireModel }}"
-    :selected-value="$selectedValue"
     placeholder="Select a country"
     search-placeholder="Search countries..."
     {{ $attributes }}
@@ -1026,7 +715,7 @@ Build reusable components for common patterns:
 
 **Usage:**
 ```blade
-<x-country-select wire-model="country_id" :selected-value="$country_id" />
+<x-country-select wire-model="country_id" />
 ```
 
 ### Server-Side Search (Large Datasets)
@@ -1045,69 +734,35 @@ public function updatedSearchTerm($value)
 }
 ```
 
-Or better yet, use the built-in API integration feature shown above.
-
-### Mixing Themes in One Application
-
-You can use both Tailwind and Bootstrap in the same app:
-
-```blade
-{{-- Admin panel uses Tailwind --}}
-<x-searchable-select
-    theme="tailwind"
-    :options="$users"
-    wire-model="admin_id"
-/>
-
-{{-- Public form uses Bootstrap --}}
-<x-searchable-select
-    theme="bootstrap"
-    :options="$countries"
-    wire-model="country_id"
-/>
-```
-
 ## Customization Guide
 
 ### Publishing Views
 
-If you need to customize the component HTML, copy the view files manually from the package:
+If you need to customize the component HTML, publish the view file:
 
+```bash
+php artisan vendor:publish --tag=searchable-select-views
 ```
-vendor/williamug/searchable-select/resources/views/searchable-select.blade.php
-vendor/williamug/searchable-select/resources/views/searchable-select-bootstrap.blade.php
-```
 
-Place your copies in `resources/views/vendor/searchable-select/` and Laravel will use them instead of the package defaults.
+This copies the view to `resources/views/vendor/searchable-select/searchable-select.blade.php`. Laravel will use your copy instead of the package default.
 
-### Dark Mode Support (Tailwind)
+### Dark Mode Support
 
-The Tailwind version automatically supports dark mode:
+The component automatically supports dark mode via Tailwind's `dark:` classes:
 
 ```html
 <html class="dark">
-    <!-- Component automatically uses dark:bg-gray-800, dark:text-white, etc. -->
+    <!-- Component automatically uses dark:bg-zinc-800, dark:text-white, etc. -->
 </html>
 ```
-
-### Bootstrap Dark Mode
-
-For Bootstrap dark mode, you can:
-
-1. Use Bootstrap's `data-bs-theme` attribute:
-```html
-<html data-bs-theme="dark">
-```
-
-2. Or publish the Bootstrap view and customize the color classes
 
 ### Customizing Search Behavior
 
 The component uses client-side filtering by default. To customize:
 
-1. **Case sensitivity**: Modify the Alpine.js `searchTerm` filtering logic
+1. **Case sensitivity**: Modify the Alpine.js `searchTerm` filtering logic in the published view
 2. **Search multiple fields**: Adjust the filter to check multiple properties
-3. **Server-side search**: Use the built-in `api-url` prop — the component debounces the API call automatically (300 ms)
+3. **Server-side search**: Use the `updatedSearchTerm` Livewire pattern shown in [Advanced Features](#advanced-features)
 
 ## Troubleshooting
 
@@ -1139,7 +794,7 @@ The component uses client-side filtering by default. To customize:
 #### Selected value not displaying
 
 **Causes:**
-- Value mismatch between `selectedValue` and options
+- Value mismatch between the Livewire property and options
 - Wrong `optionValue` key
 - Value not in options array
 
@@ -1161,9 +816,9 @@ $countries = [['code' => 'US', 'name' => 'USA']];
 ```
 ```blade
 <x-searchable-select
+    wire:model="country_code"
     :options="$countries"
     option-value="code"  {{-- Must specify 'code' --}}
-    wire-model="country_code"
 />
 ```
 
@@ -1201,102 +856,25 @@ php artisan view:clear
 
 4. Check that your CSS is loading in browser DevTools (Network tab)
 
-#### Styling issues (Bootstrap)
-
-**Causes:**
-- Bootstrap CSS not loaded
-- Wrong theme configuration
-- CSS conflicts
-
-**Solutions:**
-1. Verify Bootstrap is loaded in your layout:
-```html
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-```
-
-2. Confirm theme is set to Bootstrap:
-```bash
-# Check config
-php artisan tinker
->>> config('searchable-select.theme');
-=> "bootstrap"
-```
-
-3. Clear config cache:
-```bash
-php artisan config:clear
-php artisan view:clear
-```
-
-4. Use browser DevTools to inspect if correct classes are applied (should see `form-control`, `dropdown-menu`, etc.)
-
 #### Options not updating / Stale data
 
 **Causes:**
-- Missing `wire:key` on components
-- Not using `selectedValue` prop
+- Missing `wire:key` on components in loops
 - Livewire not detecting changes
 
 **Solutions:**
-1. Always pass `:selected-value` for reactivity:
-```blade
-{{-- ✅ Correct --}}
-<x-searchable-select
-    :options="$countries"
-    wire-model="country_id"
-    :selected-value="$country_id"  {{-- Important! --}}
-/>
-
-{{-- ❌ Incorrect --}}
-<x-searchable-select
-    :options="$countries"
-    wire-model="country_id"
-    {{-- Missing :selected-value --}}
-/>
-```
-
-2. Use `wire:key` when rendering multiple components in loops:
+1. Use `wire:key` when rendering multiple components in loops:
 ```blade
 @foreach($forms as $form)
     <x-searchable-select
         wire:key="country-{{ $form->id }}"
+        wire:model="forms.{{ $loop->index }}.country_id"
         :options="$countries"
-        wire-model="forms.{{ $loop->index }}.country_id"
     />
 @endforeach
 ```
 
-3. Every selection already calls `$wire.set()` immediately — no modifier needed. Ensure your Livewire component has a matching `updated{PropertyName}()` method if you need to react to the change server-side.
-
-#### API integration not working
-
-**Causes:**
-- Wrong API URL
-- CORS issues
-- Wrong response format
-
-**Solutions:**
-1. Verify API endpoint is accessible:
-```bash
-curl http://your-app.test/api/users/search?search=john
-```
-
-2. Check API response format (must have `data` key):
-```json
-{
-    "data": [
-        {"id": 1, "name": "John"}
-    ]
-}
-```
-
-3. Check browser Network tab (F12) for API requests and responses
-
-4. For CORS issues, add to `config/cors.php`:
-```php
-'paths' => ['api/*'],
-'allowed_origins' => ['*'],
-```
+2. Every selection calls `$wire.set()` immediately. Ensure your Livewire component has a matching `updated{PropertyName}()` method if you need to react to the change server-side.
 
 #### Multi-select not working
 
@@ -1318,7 +896,8 @@ public $selected_items; // null, not an array
 ```blade
 <x-searchable-select
     :multiple="true"  {{-- Required for multi-select --}}
-    wire-model="selected_items"
+    wire:model="selected_items"
+    :options="$items"
 />
 ```
 
@@ -1331,7 +910,7 @@ public $selected_items; // null, not an array
 **Solutions:**
 1. Add error display:
 ```blade
-<x-searchable-select wire-model="country_id" />
+<x-searchable-select wire:model="country_id" :options="$countries" />
 @error('country_id')
     <span class="text-red-500 text-sm">{{ $message }}</span>
 @enderror
@@ -1354,30 +933,26 @@ protected $rules = [
 - Client-side filtering thousands of items
 
 **Solutions:**
-1. Use API integration for large datasets:
-```blade
-<x-searchable-select
-    api-url="/api/search"  {{-- Fetch on-demand --}}
-    :options="[]"          {{-- Don't load all upfront --}}
-/>
-```
-
-2. Implement server-side pagination:
+1. Use Livewire server-side search for large datasets:
 ```php
-Route::get('/api/search', function (Request $request) {
-    return User::where('name', 'like', "%{$request->search}%")
-        ->limit(50)  // Limit results
+public $searchTerm = '';
+public $results = [];
+
+public function updatedSearchTerm($value)
+{
+    $this->results = Product::where('name', 'like', "%{$value}%")
+        ->limit(50)
         ->get();
-});
+}
 ```
 
-3. Use API mode for large datasets — the built-in search debounces automatically (300 ms):
-```blade
-<x-searchable-select
-    wire-model="selectedId"
-    api-url="/api/items"
-    placeholder="Type to search..."
-/>
+2. Select only needed columns:
+```php
+// ❌ Bad - loads all columns
+$this->users = User::all();
+
+// ✅ Good - only id and name
+$this->users = User::select('id', 'name')->get();
 ```
 
 ## Performance Optimization
@@ -1388,22 +963,11 @@ Route::get('/api/search', function (Request $request) {
 |--------------|---------------------|
 | < 100 | Client-side filtering (default) - works perfectly |
 | 100 - 1,000 | Client-side filtering with `wire:key` - still performant |
-| 1,000 - 10,000 | Consider API integration with search - better UX |
-| > 10,000 | **Must use API integration** - client-side will be slow |
+| 1,000+ | Server-side search with Livewire `updated*` hooks |
 
 ### Optimization Techniques
 
-**1. Lazy Loading with API:**
-```blade
-{{-- Don't load thousands of options upfront --}}
-<x-searchable-select
-    api-url="/api/products/search"
-    :options="[]"
-    placeholder="Search from 50,000 products..."
-/>
-```
-
-**2. Server-Side Search:**
+**1. Server-Side Search:**
 ```php
 // Livewire Component
 public $searchTerm = '';
@@ -1417,7 +981,7 @@ public function updatedSearchTerm($value)
 }
 ```
 
-**3. Caching Options:**
+**2. Caching Options:**
 ```php
 public function mount()
 {
@@ -1427,23 +991,13 @@ public function mount()
 }
 ```
 
-**4. Select Only Needed Columns:**
+**3. Select Only Needed Columns:**
 ```php
 // ❌ Bad - loads all columns
 $this->users = User::all();
 
 // ✅ Good - only id and name
 $this->users = User::select('id', 'name')->get();
-```
-
-**5. API mode for large datasets:**
-```blade
-{{-- Component debounces the API call 300 ms automatically --}}
-<x-searchable-select
-    api-url="/api/countries"
-    :options="[]"
-    wire-model="country_id"
-/>
 ```
 
 ## Testing
@@ -1469,15 +1023,14 @@ composer test -- --coverage
 ### Test Coverage
 
 The package tests include:
-- Component rendering (Tailwind & Bootstrap)
+- Component rendering
 - Single-select functionality
 - Multi-select with badges/tags
 - Grouped options rendering
-- Theme switching and per-component overrides
 - Service provider and component registration
-- Configuration loading
+- View namespace resolution
 
-**24 tests, 46 assertions** - all passing
+**17 tests, 33 assertions** - all passing
 
 ## Demo Application
 
@@ -1500,29 +1053,20 @@ Visit `http://localhost:8000`
 
 ### Demo Features
 
-The demo includes live examples of:
-- **Home** — `/`
-- **Basic single-select** — `/basic`
-- **Multi-select** — `/multi-select`
-- **Grouped options** — `/grouped`
-- **API integration** — `/api`
-- **Bootstrap theme** — `/bootstrap`
+The demo is a single consolidated page at `/` showcasing:
+- Basic single-select
+- Multi-select with badges
+- Grouped options
+- Preselected values
+- Disabled state
 
 ### Demo Source Code
 
-Check the demo Livewire components in `demo/app/Livewire/` for implementation examples.
+Check the demo Livewire component in `demo/app/Livewire/DemoPage.php` for implementation examples.
 
 
 
 ## Frequently Asked Questions
-
-### Can I use both Tailwind and Bootstrap in the same project?
-
-Yes! You can set different themes per component:
-```blade
-<x-searchable-select theme="tailwind" :options="$data1" wire-model="field1" />
-<x-searchable-select theme="bootstrap" :options="$data2" wire-model="field2" />
-```
 
 ### How do I implement country → state → city dropdowns?
 
@@ -1530,14 +1074,13 @@ See the [Dependent/Cascading Dropdowns](#dependentcascading-dropdowns) section f
 
 ### Can I customize the component HTML?
 
-Yes! Copy the view files from the package into your project:
+Yes! Publish the view file and edit your copy:
 
-```
-vendor/williamug/searchable-select/resources/views/searchable-select.blade.php
-vendor/williamug/searchable-select/resources/views/searchable-select-bootstrap.blade.php
+```bash
+php artisan vendor:publish --tag=searchable-select-views
 ```
 
-Place them in `resources/views/vendor/searchable-select/` and Laravel will use your copies instead of the package defaults.
+Your copy lands in `resources/views/vendor/searchable-select/searchable-select.blade.php`.
 
 ### Does it work with Livewire 3 and 4?
 
@@ -1545,14 +1088,15 @@ Yes, fully compatible with both Livewire 3.x and 4.x.
 
 ### How do I search across multiple fields?
 
-Use API integration with a custom endpoint that searches multiple columns:
+Use a Livewire server-side search with a custom query:
 ```php
-Route::get('/api/search', function (Request $request) {
-    return User::where('name', 'like', "%{$request->search}%")
-        ->orWhere('email', 'like', "%{$request->search}%")
-        ->orWhere('phone', 'like', "%{$request->search}%")
+public function updatedSearchTerm($value)
+{
+    $this->users = User::where('name', 'like', "%{$value}%")
+        ->orWhere('email', 'like', "%{$value}%")
+        ->orWhere('phone', 'like', "%{$value}%")
         ->get();
-});
+}
 ```
 
 ### Can I pre-select multiple values?
@@ -1564,7 +1108,7 @@ public $selected_items = [1, 3, 5]; // Pre-selected IDs
 
 ### Does it support dark mode?
 
-Yes, the Tailwind version automatically supports dark mode using `dark:` classes. For Bootstrap, use Bootstrap 5.3's dark mode features.
+Yes, the component automatically supports dark mode using Tailwind's `dark:` classes.
 
 ### How do I disable specific options?
 
@@ -1658,7 +1202,6 @@ Found a bug? Please [open an issue](https://github.com/williamug/searchable-sele
 - Laravel version
 - Livewire version
 - PHP version
-- CSS framework (Tailwind/Bootstrap)
 - Steps to reproduce
 - Expected vs actual behavior
 
@@ -1688,10 +1231,9 @@ If you discover any security vulnerabilities, please email the maintainer instea
 - [Livewire](https://livewire.laravel.com) - A full-stack framework for Laravel
 - [Alpine.js](https://alpinejs.dev) - Your new, lightweight, JavaScript framework
 - [Tailwind CSS](https://tailwindcss.com) - A utility-first CSS framework
-- [Bootstrap](https://getbootstrap.com) - The most popular HTML, CSS, and JS library
 
 ### Inspiration
-Inspired by the need for a simple, framework-agnostic searchable select component for Laravel Livewire applications.
+Inspired by the need for a simple, searchable select component for Laravel Livewire applications.
 
 ## License
 
