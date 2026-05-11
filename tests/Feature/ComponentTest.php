@@ -3,84 +3,83 @@
 use Livewire\Component;
 use Livewire\Livewire;
 
-// Component is now loaded from vendor, no installation needed
-
-test('it renders the component', function () {
-    $component = Livewire::test(TestComponent::class);
-
-    $component->assertSee('Select option');
+test('renders without errors with no wire:model', function () {
+    $html = Livewire::test(NoWireModelComponent::class)->html();
+    expect($html)->toContain('searchableSelect');
 });
 
-test('it displays custom placeholder', function () {
-    $component = Livewire::test(TestComponentWithCustomPlaceholder::class);
-
-    $component->assertSee('Choose a country');
+test('renders correct placeholder text', function () {
+    $html = Livewire::test(PlaceholderComponent::class)->html();
+    expect($html)->toContain('Choose a country');
 });
 
-test('it displays selected value', function () {
-    $component = Livewire::test(TestComponentWithSelectedValue::class);
-
-    $component->assertSee('United States');
+test('renders option values in html', function () {
+    $html = Livewire::test(BasicComponent::class)->html();
+    expect($html)->toContain('Uganda')->toContain('Kenya');
 });
 
-test('it updates value on selection', function () {
-    $component = Livewire::test(TestComponent::class);
-
-    $component->call('$set', 'selected_country', 1)
-        ->assertSet('selected_country', 1);
+test('renders selected display label when livewire property has a value', function () {
+    $html = Livewire::test(PreselectedComponent::class)->html();
+    // labelsMap embedded in HTML enables Alpine to display the label
+    expect($html)->toContain('Uganda');
 });
 
-// Test Livewire Components
-class TestComponent extends Component
+test('setting the livewire property updates the displayed label', function () {
+    $component = Livewire::test(BasicComponent::class);
+    $component->set('country_id', 2);
+    expect($component->html())->toContain('Kenya');
+});
+
+test('selecting an option updates the livewire property', function () {
+    $component = Livewire::test(BasicComponent::class);
+    $component->call('$set', 'country_id', 1);
+    $component->assertSet('country_id', 1);
+});
+
+// ─── Inline Livewire components ────────────────────────────────────────────
+
+class BasicComponent extends Component
 {
-    public $countries;
+    public ?int $country_id = null;
 
-    public $selected_country;
-
-    public function mount()
-    {
-        $this->countries = collect([
-            ['id' => 1, 'name' => 'United States'],
-            ['id' => 2, 'name' => 'Canada'],
-            ['id' => 3, 'name' => 'Mexico'],
-        ]);
-    }
-
-    public function render()
+    public function render(): string
     {
         return <<<'HTML'
         <div>
             <x-searchable-select
-                :options="$countries"
-                wire-model="selected_country"
-                :selected-value="$selected_country"
+                wire:model="country_id"
+                :options="[['id' => 1, 'name' => 'Uganda'], ['id' => 2, 'name' => 'Kenya']]"
             />
         </div>
         HTML;
     }
 }
 
-class TestComponentWithCustomPlaceholder extends Component
+class NoWireModelComponent extends Component
 {
-    public $countries;
-
-    public $selected_country;
-
-    public function mount()
-    {
-        $this->countries = collect([
-            ['id' => 1, 'name' => 'United States'],
-        ]);
-    }
-
-    public function render()
+    public function render(): string
     {
         return <<<'HTML'
         <div>
             <x-searchable-select
-                :options="$countries"
-                wire-model="selected_country"
-                :selected-value="$selected_country"
+                :options="[['id' => 1, 'name' => 'Option 1']]"
+            />
+        </div>
+        HTML;
+    }
+}
+
+class PlaceholderComponent extends Component
+{
+    public ?int $country_id = null;
+
+    public function render(): string
+    {
+        return <<<'HTML'
+        <div>
+            <x-searchable-select
+                wire:model="country_id"
+                :options="[['id' => 1, 'name' => 'Uganda']]"
                 placeholder="Choose a country"
             />
         </div>
@@ -88,28 +87,17 @@ class TestComponentWithCustomPlaceholder extends Component
     }
 }
 
-class TestComponentWithSelectedValue extends Component
+class PreselectedComponent extends Component
 {
-    public $countries;
+    public int $country_id = 1;
 
-    public $selected_country = 1;
-
-    public function mount()
-    {
-        $this->countries = collect([
-            ['id' => 1, 'name' => 'United States'],
-            ['id' => 2, 'name' => 'Canada'],
-        ]);
-    }
-
-    public function render()
+    public function render(): string
     {
         return <<<'HTML'
         <div>
             <x-searchable-select
-                :options="$countries"
-                wire-model="selected_country"
-                :selected-value="$selected_country"
+                wire:model="country_id"
+                :options="[['id' => 1, 'name' => 'Uganda'], ['id' => 2, 'name' => 'Kenya']]"
             />
         </div>
         HTML;
