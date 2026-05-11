@@ -26,6 +26,10 @@ class SearchableSelectServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../config/searchable-select.php' => config_path('searchable-select.php'),
             ], 'searchable-select-config');
+
+            $this->publishes([
+                __DIR__.'/../resources/views' => resource_path('views/vendor/searchable-select'),
+            ], 'searchable-select-views');
         }
     }
 }
