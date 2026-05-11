@@ -16,7 +16,7 @@ class SearchableSelect extends Component
     /**
      * Get the view / contents that represent the component.
      */
-    public function render()
+    public function render(): \Illuminate\Contracts\View\View|\Closure|string
     {
         if ($this->currentTheme === 'bootstrap') {
             return view('searchable-select::searchable-select-bootstrap');
