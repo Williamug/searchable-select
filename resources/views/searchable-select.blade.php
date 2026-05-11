@@ -63,16 +63,37 @@
 
             _onNavigating: null,
             _onNavigated: null,
+            _syncing: false,
 
             init() {
                 if (this.wireModelKey && this.$wire) {
                     try {
-                        const entangled = this.$wire.entangle(this.wireModelKey);
-                        if (typeof entangled.$to === 'function') {
-                            entangled.$to(this, 'selected');
-                        } else {
-                            this.selected = entangled;
-                        }
+                        // Alpine.raw() unwraps Livewire 4 reactive proxies back to plain values.
+                        // The object guard rejects any proxy that wasn't fully unwrapped (e.g.
+                        // the entire $wire proxy being returned instead of the property value).
+                        const safeRaw = (v) => {
+                            const r = (window.Alpine?.raw) ? Alpine.raw(v) : v;
+                            return (r !== null && r !== undefined && typeof r === 'object' && !Array.isArray(r))
+                                ? (this.multiple ? [] : null)
+                                : r;
+                        };
+
+                        this.selected = safeRaw(this.$wire.get(this.wireModelKey)) ?? (this.multiple ? [] : null);
+
+                        this.$watch('selected', (value) => {
+                            if (!this._syncing) {
+                                this.$wire.set(this.wireModelKey, value);
+                            }
+                        });
+
+                        this.$wire.$watch(this.wireModelKey, (value) => {
+                            const normalized = safeRaw(value) ?? (this.multiple ? [] : null);
+                            if (JSON.stringify(normalized) !== JSON.stringify(this.selected)) {
+                                this._syncing = true;
+                                this.selected = normalized;
+                                this.$nextTick(() => { this._syncing = false; });
+                            }
+                        });
                     } catch (e) {}
                 }
 
