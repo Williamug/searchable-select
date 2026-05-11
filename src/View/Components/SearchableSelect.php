@@ -2,27 +2,29 @@
 
 namespace Williamug\SearchableSelect\View\Components;
 
-use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\View\Component;
+use Illuminate\View\View;
 
 class SearchableSelect extends Component
 {
-    public string $currentTheme;
+    public function __construct(
+        public array|Collection $options = [],
+        public string $optionValue = 'id',
+        public string $optionLabel = 'name',
+        public string $placeholder = 'Select option',
+        public string $searchPlaceholder = 'Search...',
+        public string $emptyMessage = 'No options available',
+        public bool $multiple = false,
+        public bool $clearable = true,
+        public bool $disabled = false,
+        public bool $grouped = false,
+        public string $groupLabel = 'label',
+        public string $groupOptions = 'options',
+    ) {}
 
-    public function __construct(?string $theme = null)
+    public function render(): View
     {
-        $this->currentTheme = $theme ?? config('searchable-select.theme', 'tailwind');
-    }
-
-    /**
-     * Get the view / contents that represent the component.
-     */
-    public function render(): View|\Closure|string
-    {
-        if ($this->currentTheme === 'bootstrap') {
-            return view('searchable-select::searchable-select-bootstrap');
-        }
-
         return view('searchable-select::searchable-select');
     }
 }

@@ -8,14 +8,6 @@ use Williamug\SearchableSelect\View\Components\SearchableSelect;
 
 class SearchableSelectServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        $this->mergeConfigFrom(
-            __DIR__.'/../config/searchable-select.php',
-            'searchable-select'
-        );
-    }
-
     public function boot(): void
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'searchable-select');
@@ -23,10 +15,6 @@ class SearchableSelectServiceProvider extends ServiceProvider
         Blade::component(SearchableSelect::class, 'searchable-select');
 
         if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__.'/../config/searchable-select.php' => config_path('searchable-select.php'),
-            ], 'searchable-select-config');
-
             $this->publishes([
                 __DIR__.'/../resources/views' => resource_path('views/vendor/searchable-select'),
             ], 'searchable-select-views');

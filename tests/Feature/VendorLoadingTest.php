@@ -1,11 +1,25 @@
 <?php
 
-test('it loads component from vendor without publishing', function () {
-    // Verify view namespace is registered
-    $hints = app('view')->getFinder()->getHints();
-    expect($hints)->toHaveKey('searchable-select');
+use Illuminate\Support\ServiceProvider;
+use Williamug\SearchableSelect\SearchableSelectServiceProvider;
 
-    // Verify view file exists in vendor
-    $viewPath = __DIR__.'/../../resources/views/searchable-select.blade.php';
+test('service provider registers the component alias', function () {
+    $aliases = app('blade.compiler')->getClassComponentAliases();
+    expect($aliases)->toHaveKey('searchable-select');
+});
+
+test('view namespace resolves correctly', function () {
+    expect(app('view')->getFinder()->getHints())->toHaveKey('searchable-select');
+
+    $viewPath = realpath(__DIR__.'/../../resources/views/searchable-select.blade.php');
+    expect($viewPath)->not->toBeFalse();
     expect(file_exists($viewPath))->toBeTrue();
+});
+
+test('publishable views tag is registered', function () {
+    $paths = ServiceProvider::pathsToPublish(
+        SearchableSelectServiceProvider::class,
+        'searchable-select-views'
+    );
+    expect($paths)->not->toBeEmpty();
 });

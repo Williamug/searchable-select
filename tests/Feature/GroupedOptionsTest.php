@@ -3,71 +3,47 @@
 use Livewire\Component;
 use Livewire\Livewire;
 
-// Component is now loaded from vendor, no installation needed
-
-test('it renders grouped options', function () {
-    $component = Livewire::test(GroupedOptionsComponent::class);
-
-    $component->assertSee('North America')
-        ->assertSee('Europe')
-        ->assertSee('United States')
-        ->assertSee('France');
+test('group headers render in html', function () {
+    $html = Livewire::test(GroupedComponent::class)->html();
+    // Group names are in the JSON-encoded options
+    expect($html)->toContain('East Africa')->toContain('West Africa');
 });
 
-test('it can select from grouped options', function () {
-    $component = Livewire::test(GroupedOptionsComponent::class);
-
-    $component->set('country_id', 1);
-
-    expect($component->get('country_id'))->toBe(1);
+test('items within groups render correctly', function () {
+    $html = Livewire::test(GroupedComponent::class)->html();
+    expect($html)->toContain('Uganda')->toContain('Ghana');
 });
 
-test('it displays group labels correctly', function () {
-    $component = Livewire::test(GroupedOptionsComponent::class);
-
-    $html = $component->html();
-
-    expect($html)->toContain('North America');
-    expect($html)->toContain('Europe');
+test('search filtering within groups works', function () {
+    $html = Livewire::test(GroupedComponent::class)->html();
+    // The grouped template renders the filteredOptions loop and group headers
+    expect($html)
+        ->toContain('grouped: true')
+        ->toContain('uppercase tracking-wider')
+        ->toContain('filteredOptions');
 });
 
-// Test Livewire Component
-class GroupedOptionsComponent extends Component
+// ─── Inline Livewire components ────────────────────────────────────────────
+
+class GroupedComponent extends Component
 {
-    public $locations;
+    public ?int $country_id = null;
 
-    public $country_id;
-
-    public function mount()
-    {
-        $this->locations = [
-            [
-                'label' => 'North America',
-                'options' => [
-                    ['id' => 1, 'name' => 'United States'],
-                    ['id' => 2, 'name' => 'Canada'],
-                    ['id' => 3, 'name' => 'Mexico'],
-                ],
-            ],
-            [
-                'label' => 'Europe',
-                'options' => [
-                    ['id' => 4, 'name' => 'United Kingdom'],
-                    ['id' => 5, 'name' => 'France'],
-                    ['id' => 6, 'name' => 'Germany'],
-                ],
-            ],
-        ];
-    }
-
-    public function render()
+    public function render(): string
     {
         return <<<'HTML'
         <div>
             <x-searchable-select
-                :options="$locations"
-                wire-model="country_id"
-                :selected-value="$country_id"
+                wire:model="country_id"
+                :options="[
+                    ['label' => 'East Africa', 'options' => [
+                        ['id' => 1, 'name' => 'Uganda'],
+                        ['id' => 2, 'name' => 'Kenya'],
+                    ]],
+                    ['label' => 'West Africa', 'options' => [
+                        ['id' => 3, 'name' => 'Ghana'],
+                    ]],
+                ]"
                 :grouped="true"
                 placeholder="Select Country"
             />

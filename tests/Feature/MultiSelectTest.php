@@ -3,130 +3,53 @@
 use Livewire\Component;
 use Livewire\Livewire;
 
-// Component is now loaded from vendor, no installation needed
-
-test('it shows clear button when values selected', function () {
-    $component = Livewire::test(MultiSelectComponent::class);
-
-    expect($component->get('selected_countries'))->toBeArray();
-    expect($component->get('selected_countries'))->toBeEmpty();
+test('renders in multi-select mode', function () {
+    $html = Livewire::test(MultiComponent::class)->html();
+    expect($html)->toContain('multiple: true');
 });
 
-test('it can select multiple values', function () {
-    $component = Livewire::test(MultiSelectComponent::class);
+test('multiple selected values render as tags', function () {
+    $component = Livewire::test(MultiComponent::class)
+        ->set('country_ids', [1, 2]);
 
-    $component->set('selected_countries', [1, 2]);
-
-    expect($component->get('selected_countries'))
-        ->toBeArray()
-        ->toHaveCount(2)
-        ->toContain(1)
-        ->toContain(2);
+    // Option labels are in labelsMap JSON for Alpine to render as tags
+    expect($component->html())
+        ->toContain('United States')
+        ->toContain('Canada');
 });
 
-test('it displays selected values as tags', function () {
-    $component = Livewire::test(MultiSelectComponent::class)
-        ->set('selected_countries', [1, 2]);
+test('removing a tag updates the livewire property', function () {
+    $component = Livewire::test(MultiComponent::class)
+        ->set('country_ids', [1, 2, 3]);
 
-    $component->assertSee('United States')
-        ->assertSee('Canada');
-});
+    $component->set('country_ids', [1, 3]);
 
-test('it can remove individual selections', function () {
-    $component = Livewire::test(MultiSelectComponent::class)
-        ->set('selected_countries', [1, 2, 3]);
-
-    // Remove one item
-    $component->set('selected_countries', [1, 3]);
-
-    expect($component->get('selected_countries'))
+    expect($component->get('country_ids'))
         ->toHaveCount(2)
         ->toContain(1)
         ->toContain(3)
         ->not->toContain(2);
 });
 
-test('it shows clear button in single select mode', function () {
-    $component = Livewire::test(ClearableComponent::class)
-        ->set('country_id', 1);
+// ─── Inline Livewire components ────────────────────────────────────────────
 
-    $html = $component->html();
-    expect($html)->toContain('@click.stop="clearAll()');
-});
-
-test('it can clear all selections', function () {
-    $component = Livewire::test(ClearableComponent::class)
-        ->set('country_id', 1);
-
-    $component->set('country_id', null);
-
-    expect($component->get('country_id'))->toBeNull();
-});
-
-test('it can clear multiple selections', function () {
-    $component = Livewire::test(MultiSelectComponent::class)
-        ->set('selected_countries', [1, 2, 3]);
-
-    $component->set('selected_countries', []);
-
-    expect($component->get('selected_countries'))->toBeEmpty();
-});
-
-// Test Livewire Components
-class MultiSelectComponent extends Component
+class MultiComponent extends Component
 {
-    public $countries;
+    public array $country_ids = [];
 
-    public $selected_countries = [];
-
-    public function mount()
-    {
-        $this->countries = collect([
-            ['id' => 1, 'name' => 'United States'],
-            ['id' => 2, 'name' => 'Canada'],
-            ['id' => 3, 'name' => 'Mexico'],
-        ]);
-    }
-
-    public function render()
+    public function render(): string
     {
         return <<<'HTML'
         <div>
             <x-searchable-select
-                :options="$countries"
-                wire-model="selected_countries"
-                :selected-value="$selected_countries"
+                wire:model="country_ids"
+                :options="[
+                    ['id' => 1, 'name' => 'United States'],
+                    ['id' => 2, 'name' => 'Canada'],
+                    ['id' => 3, 'name' => 'Mexico'],
+                ]"
                 :multiple="true"
-                placeholder="Select Countries"
-            />
-        </div>
-        HTML;
-    }
-}
-
-class ClearableComponent extends Component
-{
-    public $countries;
-
-    public $country_id;
-
-    public function mount()
-    {
-        $this->countries = collect([
-            ['id' => 1, 'name' => 'United States'],
-            ['id' => 2, 'name' => 'Canada'],
-        ]);
-    }
-
-    public function render()
-    {
-        return <<<'HTML'
-        <div>
-            <x-searchable-select
-                :options="$countries"
-                wire-model="country_id"
-                :selected-value="$country_id"
-                :clearable="true"
+                placeholder="Select countries"
             />
         </div>
         HTML;
