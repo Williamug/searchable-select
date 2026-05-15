@@ -63,7 +63,7 @@ A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 
 - **Laravel**: 11.x, 12.x, 13.x
 - **Livewire**: 3.x or 4.x
 - **Alpine.js**: Bundled with Livewire (no separate install needed)
-- **Tailwind CSS**: 3.x+
+- **Tailwind CSS**: 3.x or 4.x
 
 ## Installation
 
@@ -83,14 +83,27 @@ php artisan vendor:publish --tag=searchable-select-views
 
 ## Tailwind CSS Setup
 
-**1. Ensure Tailwind is installed in your project:**
+The component is styled with Tailwind utility classes. You must tell Tailwind to scan the package's blade views, otherwise those classes will be purged and the dropdown will appear unstyled or invisible.
 
-```bash
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init
+### Tailwind v4 (`@tailwindcss/vite` or `@tailwindcss/postcss`)
+
+Add a `@source` directive to your main CSS file (typically `resources/css/app.css`):
+
+```css
+@import 'tailwindcss';
+
+@source '../../vendor/williamug/searchable-select/resources/views/**/*.blade.php';
 ```
 
-**2. Add the package views to your `tailwind.config.js`:**
+Then rebuild your assets:
+
+```bash
+npm run build
+```
+
+### Tailwind v3 (`tailwindcss` with `tailwind.config.js`)
+
+Add the package views to the `content` array in `tailwind.config.js`:
 
 ```js
 export default {
@@ -106,7 +119,7 @@ export default {
 }
 ```
 
-**3. Build your CSS:**
+Then rebuild your assets:
 
 ```bash
 npm run build
@@ -824,35 +837,43 @@ $countries = [['code' => 'US', 'name' => 'USA']];
 
 3. Use browser DevTools to inspect the component's Alpine.js data
 
-#### Styling issues (Tailwind)
+#### Styling issues / dropdown appears unstyled or invisible
 
 **Causes:**
-- Package views not included in Tailwind purge paths
-- Tailwind not built
+- Package views not included in Tailwind's content scanning
+- Tailwind not rebuilt after adding the source
 - CSS not loading
 
 **Solutions:**
-1. Add package views to `tailwind.config.js`:
-```js
-export default {
-  content: [
-    './resources/**/*.blade.php',
-    './vendor/williamug/searchable-select/resources/views/**/*.blade.php', // Add this
-  ],
-}
-```
+
+1. Add the package views to Tailwind's scan paths and rebuild:
+
+   **Tailwind v4** — add a `@source` line to `resources/css/app.css`:
+   ```css
+   @source '../../vendor/williamug/searchable-select/resources/views/**/*.blade.php';
+   ```
+
+   **Tailwind v3** — add to the `content` array in `tailwind.config.js`:
+   ```js
+   export default {
+     content: [
+       './resources/**/*.blade.php',
+       './vendor/williamug/searchable-select/resources/views/**/*.blade.php', // Add this
+     ],
+   }
+   ```
 
 2. Rebuild Tailwind CSS:
-```bash
-npm run build
-# or for development
-npm run dev
-```
+   ```bash
+   npm run build
+   # or for development
+   npm run dev
+   ```
 
 3. Clear Laravel view cache:
-```bash
-php artisan view:clear
-```
+   ```bash
+   php artisan view:clear
+   ```
 
 4. Check that your CSS is loading in browser DevTools (Network tab)
 

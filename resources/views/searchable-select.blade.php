@@ -125,6 +125,11 @@
                     } catch (e) {}
                 };
 
+                // Always read options from data attributes on init. This is more reliable
+                // than x-data JSON in Livewire 4, where the attribute is re-evaluated
+                // after hydration and entity-encoded JSON can parse incorrectly.
+                this._refreshOptions();
+
                 document.addEventListener('livewire:navigating', this._onNavigating);
                 document.addEventListener('livewire:navigated',  this._onNavigated);
                 document.addEventListener('livewire:morphed',    this._refreshOptions);
@@ -386,8 +391,8 @@
 
     {{-- Dropdown panel teleported to <body> so it is never clipped by a parent
          stacking context, overflow:hidden, or transform on an ancestor element. --}}
+    <template x-teleport="body">
     <div
-        x-teleport="body"
         x-show="isOpen"
         x-cloak
         x-transition:enter="transition ease-out duration-100"
@@ -478,4 +483,5 @@
             @endif
         </div>
     </div>
+    </template>
 </div>
