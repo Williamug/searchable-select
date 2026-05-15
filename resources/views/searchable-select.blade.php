@@ -61,8 +61,18 @@
             grouped: config.grouped ?? false,
             wireModelKey: config.wireModelKey ?? null,
 
+            // Dropdown positioning (fixed, so it always clears other elements)
+            dropdownX: 0,
+            dropdownY: 0,
+            dropdownBottom: 0,
+            dropdownWidth: 0,
+            dropdownOpenUpward: false,
+
             _onNavigating: null,
             _onNavigated: null,
+            _onScroll: null,
+            _onResize: null,
+            _refreshOptions: null,
             _syncing: false,
 
             init() {
@@ -100,13 +110,49 @@
                 this._onNavigating = () => this.close();
                 this._onNavigated = () => { this.search = ''; };
 
+                // Reposition while open so the dropdown tracks the trigger on scroll/resize
+                this._onScroll = () => { if (this.isOpen) this.updatePosition(); };
+                this._onResize = () => { if (this.isOpen) this.updatePosition(); };
+
+                // Livewire re-renders update the DOM but don't re-run x-data. Read fresh
+                // options from data attributes that Livewire's morphdom DOES update.
+                this._refreshOptions = () => {
+                    try {
+                        const opts = this.$el.getAttribute('data-searchable-options');
+                        const map  = this.$el.getAttribute('data-searchable-labels');
+                        if (opts !== null) this.options    = JSON.parse(opts);
+                        if (map  !== null) this.labelsMap  = JSON.parse(map);
+                    } catch (e) {}
+                };
+
                 document.addEventListener('livewire:navigating', this._onNavigating);
-                document.addEventListener('livewire:navigated', this._onNavigated);
+                document.addEventListener('livewire:navigated',  this._onNavigated);
+                document.addEventListener('livewire:morphed',    this._refreshOptions);
+                window.addEventListener('scroll', this._onScroll, { passive: true, capture: true });
+                window.addEventListener('resize', this._onResize, { passive: true });
             },
 
             destroy() {
                 document.removeEventListener('livewire:navigating', this._onNavigating);
-                document.removeEventListener('livewire:navigated', this._onNavigated);
+                document.removeEventListener('livewire:navigated',  this._onNavigated);
+                document.removeEventListener('livewire:morphed',    this._refreshOptions);
+                window.removeEventListener('scroll', this._onScroll, true);
+                window.removeEventListener('resize', this._onResize);
+            },
+
+            // Compute fixed-position coordinates from the trigger's bounding rect.
+            // position:fixed uses viewport coords directly — no scroll offset needed.
+            updatePosition() {
+                const trigger = this.$refs.trigger;
+                if (!trigger) return;
+                const rect = trigger.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.bottom;
+                const maxH = 304; // matches max-h-76 below (~19 rem)
+                this.dropdownOpenUpward = spaceBelow < maxH && rect.top > spaceBelow;
+                this.dropdownX      = rect.left;
+                this.dropdownY      = rect.bottom + 4;
+                this.dropdownBottom = window.innerHeight - rect.top + 4;
+                this.dropdownWidth  = rect.width;
             },
 
             get flatOptions() {
@@ -141,6 +187,7 @@
 
             open() {
                 if (this.disabled || this.isOpen) return;
+                this.updatePosition();
                 this.isOpen = true;
                 this.highlightedIndex = -1;
                 this.$nextTick(() => this.$refs.searchInput?.focus());
@@ -255,10 +302,13 @@
         labelsMap: {{ json_encode((object) $labelsMap) }},
     })"
     @keydown="handleKeydown"
+    data-searchable-options="{{ json_encode($alpineOptions) }}"
+    data-searchable-labels="{{ json_encode($labelsMap) }}"
     class="relative"
 >
     {{-- Trigger --}}
     <div
+        x-ref="trigger"
         @click="toggle()"
         {{ $attributes->filter(fn($v, $k) => !in_array($k, $skipAttrs) && !str_starts_with($k, 'wire:model'))->merge(['class' => 'w-full text-left border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white cursor-pointer select-none transition-shadow']) }}
         :class="{ 'opacity-50 cursor-not-allowed pointer-events-none': disabled, 'ring-2 ring-blue-500 border-blue-500': isOpen }"
@@ -332,10 +382,12 @@
     </div>
 
     {{-- Backdrop: closes dropdown on outside click, immune to Livewire morphing --}}
-    <div x-show="isOpen" x-cloak class="fixed inset-0 z-40" @click="close()" style="background: transparent;"></div>
+    <div x-show="isOpen" x-cloak class="fixed inset-0 z-[9998]" @click="close()" style="background: transparent;"></div>
 
-    {{-- Dropdown panel sits above the backdrop --}}
+    {{-- Dropdown panel teleported to <body> so it is never clipped by a parent
+         stacking context, overflow:hidden, or transform on an ancestor element. --}}
     <div
+        x-teleport="body"
         x-show="isOpen"
         x-cloak
         x-transition:enter="transition ease-out duration-100"
@@ -344,7 +396,15 @@
         x-transition:leave="transition ease-in duration-75"
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
-        class="absolute z-50 w-full mt-1 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden"
+        :style="{
+            position: 'fixed',
+            left:   dropdownX + 'px',
+            width:  dropdownWidth + 'px',
+            top:    dropdownOpenUpward ? 'auto' : (dropdownY + 'px'),
+            bottom: dropdownOpenUpward ? (dropdownBottom + 'px') : 'auto',
+            zIndex: 9999,
+        }"
+        class="origin-top bg-white dark:bg-zinc-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden"
         role="listbox"
         :aria-multiselectable="multiple"
     >
