@@ -1,10 +1,10 @@
 <?php
 
-namespace Williamug\SearchableSelect;
+namespace Ajjitech\SearchableSelect;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
-use Williamug\SearchableSelect\View\Components\SearchableSelect;
+use Ajjitech\SearchableSelect\View\Components\SearchableSelect;
 
 class SearchableSelectServiceProvider extends ServiceProvider
 {

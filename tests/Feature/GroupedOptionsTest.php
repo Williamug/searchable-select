@@ -19,7 +19,7 @@ test('search filtering within groups works', function () {
     // The grouped template renders the filteredOptions loop and group headers
     expect($html)
         ->toContain('grouped: true')
-        ->toContain('uppercase tracking-wider')
+        ->toContain('ss-group-header')
         ->toContain('filteredOptions');
 });
 

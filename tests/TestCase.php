@@ -1,10 +1,10 @@
 <?php
 
-namespace Williamug\SearchableSelect\Tests;
+namespace Ajjitech\SearchableSelect\Tests;
 
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Williamug\SearchableSelect\SearchableSelectServiceProvider;
+use Ajjitech\SearchableSelect\SearchableSelectServiceProvider;
 
 class TestCase extends Orchestra
 {

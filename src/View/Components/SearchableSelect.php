@@ -1,6 +1,6 @@
 <?php
 
-namespace Williamug\SearchableSelect\View\Components;
+namespace Ajjitech\SearchableSelect\View\Components;
 
 use Illuminate\Support\Collection;
 use Illuminate\View\Component;

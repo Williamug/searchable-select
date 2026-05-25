@@ -43,6 +43,221 @@
 
 @once
 <style>[x-cloak] { display: none !important; }</style>
+<style>
+.ss-trigger {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 42px;
+    padding: 0.375rem 0.75rem;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border: var(--bs-border-width, 1px) solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius, 0.375rem);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    overflow: hidden;
+}
+
+.ss-trigger.ss-open {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.ss-trigger.ss-disabled {
+    background-color: var(--bs-secondary-bg);
+    opacity: 0.65;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.ss-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.ss-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.ss-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    padding: 0.125rem 0.25rem 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: var(--bs-primary-bg-subtle, #cfe2ff);
+    color: var(--bs-primary-text-emphasis, #052c65);
+    max-width: 100%;
+}
+
+.ss-tag-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ss-tag-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 50%;
+    opacity: 0.7;
+    line-height: 1;
+}
+
+.ss-tag-remove:hover {
+    opacity: 1;
+    background-color: rgba(var(--bs-primary-rgb, 13, 110, 253), 0.2);
+}
+
+.ss-placeholder {
+    display: block;
+    color: var(--bs-secondary-color, #6c757d);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ss-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.ss-clear-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--bs-secondary-color, #6c757d);
+    cursor: pointer;
+    border-radius: 0.2rem;
+    transition: color 0.1s ease, background-color 0.1s ease;
+    line-height: 1;
+}
+
+.ss-clear-btn:hover {
+    color: var(--bs-body-color);
+    background-color: var(--bs-secondary-bg);
+}
+
+.ss-chevron {
+    color: var(--bs-secondary-color, #6c757d);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.ss-chevron.ss-open {
+    transform: rotate(180deg);
+}
+
+.ss-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+}
+
+.ss-panel {
+    background-color: var(--bs-body-bg);
+    border: var(--bs-border-width, 1px) solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius, 0.375rem);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.ss-search {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border: none;
+    border-bottom: var(--bs-border-width, 1px) solid var(--bs-border-color);
+    outline: none;
+}
+
+.ss-search::placeholder {
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.ss-options-list {
+    max-height: 240px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.ss-group-header {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bs-secondary-color, #6c757d);
+    background-color: var(--bs-secondary-bg, #e9ecef);
+}
+
+.ss-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    color: var(--bs-body-color);
+    transition: background-color 0.1s ease;
+}
+
+.ss-option:hover {
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+}
+
+.ss-option.ss-selected {
+    background-color: var(--bs-primary-bg-subtle, #cfe2ff);
+    color: var(--bs-primary-text-emphasis, #052c65);
+}
+
+.ss-option.ss-highlighted:not(.ss-selected) {
+    background-color: var(--bs-secondary-bg, #e9ecef);
+}
+
+.ss-check-icon {
+    color: var(--bs-primary, #0d6efd);
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+}
+
+.ss-empty {
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+</style>
 <script>
 (function () {
     if (window.__searchableSelectRegistered) return;
@@ -152,7 +367,7 @@
                 if (!trigger) return;
                 const rect = trigger.getBoundingClientRect();
                 const spaceBelow = window.innerHeight - rect.bottom;
-                const maxH = 304; // matches max-h-76 below (~19 rem)
+                const maxH = 304;
                 this.dropdownOpenUpward = spaceBelow < maxH && rect.top > spaceBelow;
                 this.dropdownX      = rect.left;
                 this.dropdownY      = rect.bottom + 4;
@@ -309,85 +524,86 @@
     @keydown="handleKeydown"
     data-searchable-options="{{ json_encode($alpineOptions) }}"
     data-searchable-labels="{{ json_encode($labelsMap) }}"
-    class="relative"
+    class="position-relative"
 >
     {{-- Trigger --}}
     <div
         x-ref="trigger"
         @click="toggle()"
-        {{ $attributes->filter(fn($v, $k) => !in_array($k, $skipAttrs) && !str_starts_with($k, 'wire:model'))->merge(['class' => 'w-full text-left border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white cursor-pointer select-none transition-shadow']) }}
-        :class="{ 'opacity-50 cursor-not-allowed pointer-events-none': disabled, 'ring-2 ring-blue-500 border-blue-500': isOpen }"
+        {{ $attributes->filter(fn($v, $k) => !in_array($k, $skipAttrs) && !str_starts_with($k, 'wire:model'))->merge(['class' => 'ss-trigger']) }}
+        :class="{ 'ss-open': isOpen, 'ss-disabled': disabled }"
         role="combobox"
         aria-haspopup="listbox"
         :aria-expanded="isOpen"
         tabindex="0"
     >
-        <div class="flex items-center gap-2 px-3 py-2 min-h-[42px]">
-            <div class="flex-1 min-w-0">
-                {{-- Multi-select tags --}}
-                <template x-if="multiple && Array.isArray(selected) && selected.length > 0">
-                    <div class="flex flex-wrap gap-1.5">
-                        <template x-for="val in selected" :key="val">
-                            <span class="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 max-w-full">
-                                <span class="truncate" x-text="getLabel(val)"></span>
-                                <span
-                                    @click.stop="removeTag(val)"
-                                    class="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 cursor-pointer transition-colors"
-                                    role="button"
-                                    aria-label="Remove"
-                                >
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </span>
-                            </span>
-                        </template>
-                    </div>
-                </template>
+        <div class="ss-content">
+            {{-- Multi-select tags --}}
+            <template x-if="multiple && Array.isArray(selected) && selected.length > 0">
+                <div class="ss-tags">
+                    <template x-for="val in selected" :key="val">
+                        <span class="ss-tag">
+                            <span class="ss-tag-label" x-text="getLabel(val)"></span>
+                            <button
+                                type="button"
+                                @click.stop="removeTag(val)"
+                                class="ss-tag-remove"
+                                aria-label="Remove"
+                            >
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </span>
+                    </template>
+                </div>
+            </template>
 
-                {{-- Single select display --}}
-                <template x-if="!multiple && selected !== null">
-                    <span class="block truncate" x-text="getLabel(selected)"></span>
-                </template>
+            {{-- Single select display --}}
+            <template x-if="!multiple && selected !== null">
+                <span class="d-block text-truncate" x-text="getLabel(selected)"></span>
+            </template>
 
-                {{-- Placeholder --}}
-                <template x-if="(multiple && (!Array.isArray(selected) || selected.length === 0)) || (!multiple && selected === null)">
-                    <span class="block truncate text-gray-400 dark:text-gray-500">{{ $placeholder }}</span>
-                </template>
-            </div>
+            {{-- Placeholder --}}
+            <template x-if="(multiple && (!Array.isArray(selected) || selected.length === 0)) || (!multiple && selected === null)">
+                <span class="ss-placeholder">{{ $placeholder }}</span>
+            </template>
+        </div>
 
-            <div class="flex items-center gap-1 flex-shrink-0">
-                {{-- Clear button --}}
-                <span
-                    x-show="clearable && !disabled && (multiple ? (Array.isArray(selected) && selected.length > 0) : selected !== null)"
-                    x-cloak
-                    @click.stop="clearAll()"
-                    class="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer transition-colors"
-                    role="button"
-                    aria-label="Clear selection"
-                    title="Clear"
-                >
-                    <svg class="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </span>
-
-                {{-- Chevron --}}
-                <svg
-                    class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200"
-                    :class="{ 'rotate-180': isOpen }"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        <div class="ss-controls">
+            {{-- Clear button --}}
+            <button
+                type="button"
+                x-show="clearable && !disabled && (multiple ? (Array.isArray(selected) && selected.length > 0) : selected !== null)"
+                x-cloak
+                @click.stop="clearAll()"
+                class="ss-clear-btn"
+                aria-label="Clear selection"
+                title="Clear"
+            >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
-            </div>
+            </button>
+
+            {{-- Chevron --}}
+            <svg
+                class="ss-chevron"
+                :class="{ 'ss-open': isOpen }"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
         </div>
     </div>
 
     {{-- Backdrop: closes dropdown on outside click, immune to Livewire morphing --}}
-    <div x-show="isOpen" x-cloak class="fixed inset-0 z-[9998]" @click="close()" style="background: transparent;"></div>
+    <div x-show="isOpen" x-cloak class="ss-backdrop" @click="close()"></div>
 
     {{-- Dropdown panel teleported to <body> so it is never clipped by a parent
          stacking context, overflow:hidden, or transform on an ancestor element. --}}
@@ -395,12 +611,7 @@
     <div
         x-show="isOpen"
         x-cloak
-        x-transition:enter="transition ease-out duration-100"
-        x-transition:enter-start="opacity-0 scale-95"
-        x-transition:enter-end="opacity-100 scale-100"
-        x-transition:leave="transition ease-in duration-75"
-        x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-95"
+        x-transition
         :style="{
             position: 'fixed',
             left:   dropdownX + 'px',
@@ -409,7 +620,7 @@
             bottom: dropdownOpenUpward ? (dropdownBottom + 'px') : 'auto',
             zIndex: 9999,
         }"
-        class="origin-top bg-white dark:bg-zinc-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden"
+        class="ss-panel"
         role="listbox"
         :aria-multiselectable="multiple"
     >
@@ -419,67 +630,56 @@
             x-model="search"
             @click.stop
             placeholder="{{ $searchPlaceholder }}"
-            class="w-full px-3 py-2.5 border-b border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:outline-none text-sm"
+            class="ss-search"
             aria-label="Search options"
         >
 
-        <div class="max-h-60 overflow-auto overscroll-contain" x-ref="optionsList">
+        <div class="ss-options-list" x-ref="optionsList">
             @if ($grouped)
                 <template x-for="group in filteredOptions" :key="group.group">
                     <div>
-                        <div
-                            class="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-zinc-900 uppercase tracking-wider"
-                            x-text="group.group"
-                        ></div>
+                        <div class="ss-group-header" x-text="group.group"></div>
                         <template x-for="option in group.items" :key="option.value">
                             <div
                                 @click="select(option.value)"
-                                class="px-3 py-2.5 cursor-pointer flex items-center justify-between transition-colors"
+                                class="ss-option"
                                 :class="{
-                                    'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300': isSelected(option.value),
-                                    'hover:bg-gray-100 dark:hover:bg-gray-700': !isSelected(option.value),
-                                    'bg-gray-100 dark:bg-gray-700': flatOptions[highlightedIndex]?.value === option.value && !isSelected(option.value)
+                                    'ss-selected': isSelected(option.value),
+                                    'ss-highlighted': flatOptions[highlightedIndex]?.value === option.value
                                 }"
                                 :data-highlighted="flatOptions[highlightedIndex]?.value === option.value"
                                 role="option"
                                 :aria-selected="isSelected(option.value)"
                             >
-                                <span x-text="option.label" class="truncate"></span>
-                                <svg x-show="isSelected(option.value)" class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                <span class="text-truncate" x-text="option.label"></span>
+                                <svg x-show="isSelected(option.value)" class="ss-check-icon" width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                 </svg>
                             </div>
                         </template>
                     </div>
                 </template>
-                <div
-                    x-show="filteredOptions.length === 0"
-                    class="px-3 py-3 text-gray-500 dark:text-gray-400 text-sm text-center"
-                >{{ $emptyMessage }}</div>
+                <div x-show="filteredOptions.length === 0" class="ss-empty">{{ $emptyMessage }}</div>
             @else
                 <template x-for="(option, index) in filteredOptions" :key="option.value">
                     <div
                         @click="select(option.value)"
-                        class="px-3 py-2.5 cursor-pointer flex items-center justify-between transition-colors"
+                        class="ss-option"
                         :class="{
-                            'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300': isSelected(option.value),
-                            'hover:bg-gray-100 dark:hover:bg-gray-700': !isSelected(option.value),
-                            'bg-gray-100 dark:bg-gray-700': highlightedIndex === index && !isSelected(option.value)
+                            'ss-selected': isSelected(option.value),
+                            'ss-highlighted': highlightedIndex === index
                         }"
                         :data-highlighted="highlightedIndex === index"
                         role="option"
                         :aria-selected="isSelected(option.value)"
                     >
-                        <span x-text="option.label" class="truncate"></span>
-                        <svg x-show="isSelected(option.value)" class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        <span class="text-truncate" x-text="option.label"></span>
+                        <svg x-show="isSelected(option.value)" class="ss-check-icon" width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                         </svg>
                     </div>
                 </template>
-                <div
-                    x-show="filteredOptions.length === 0"
-                    class="px-3 py-3 text-gray-500 dark:text-gray-400 text-sm text-center"
-                >{{ $emptyMessage }}</div>
+                <div x-show="filteredOptions.length === 0" class="ss-empty">{{ $emptyMessage }}</div>
             @endif
         </div>
     </div>
