@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\ServiceProvider;
-use Williamug\SearchableSelect\SearchableSelectServiceProvider;
+use Ajjitech\SearchableSelect\SearchableSelectServiceProvider;
 
 test('service provider registers the component alias', function () {
     $aliases = app('blade.compiler')->getClassComponentAliases();
