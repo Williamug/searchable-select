@@ -21,6 +21,7 @@ A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 
   - [Dependent/Cascading Dropdowns](#dependentcascading-dropdowns)
   - [Grouped Options](#grouped-options)
   - [Custom Keys](#custom-keys)
+  - [Bootstrap Modal](#bootstrap-modal)
   - [With Validation](#with-validation)
   - [Disabled State](#disabled-state)
   - [Without Clear Button](#without-clear-button)
@@ -201,6 +202,7 @@ That's it. The component syncs with your Livewire property via `wire:model` auto
 | `grouped` | Boolean | `false` | No | Enable grouped options mode |
 | `groupLabel` | String | `'label'` | No | Key for group label (when `grouped` is true) |
 | `groupOptions` | String | `'options'` | No | Key for group items array (when `grouped` is true) |
+| `teleport` | Boolean | `true` | No | Teleport the dropdown panel to `<body>` to avoid clipping by parent containers. Set to `false` inside Bootstrap modals. |
 
 > **`wire:model`** is a standard Livewire directive. Pass it as `wire:model="propertyName"` and the component handles two-way binding automatically.
 
@@ -402,6 +404,31 @@ public $selected_sku;
     option-label="product_name"
     placeholder="Select a product"
 />
+```
+
+### Bootstrap Modal
+
+When using the component inside a Bootstrap modal, disable teleporting so the dropdown stays inside the modal's DOM and follows Bootstrap's focus and stacking context correctly.
+
+```blade
+<div class="modal fade" id="demoModal" tabindex="-1" aria-hidden="true" wire:ignore.self>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <label class="form-label">Country Inside Modal</label>
+
+                <x-searchable-select
+                    wire:model.live="selectedCountry"
+                    :options="$countries"
+                    option-label="name"
+                    option-value="id"
+                    placeholder="Search country..."
+                    :teleport="false"
+                />
+            </div>
+        </div>
+    </div>
+</div>
 ```
 
 ### With Validation
