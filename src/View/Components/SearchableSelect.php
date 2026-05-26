@@ -21,6 +21,7 @@ class SearchableSelect extends Component
         public bool $grouped = false,
         public string $groupLabel = 'label',
         public string $groupOptions = 'options',
+        public bool $teleport = true,
     ) {}
 
     public function render(): View

@@ -144,6 +144,7 @@
                                 label="name"
                                 value="id"
                                 placeholder="Search country..."
+                                :teleport="false"
                             />
                         </div>
 
@@ -158,6 +159,7 @@
                                 label="name"
                                 value="id"
                                 placeholder="Search framework..."
+                                :teleport="false"
                             />
                         </div>
 

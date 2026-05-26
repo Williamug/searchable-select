@@ -38,7 +38,7 @@
     }
 
     $skipAttrs = ['options', 'option-value', 'option-label', 'placeholder', 'search-placeholder',
-        'empty-message', 'multiple', 'clearable', 'disabled', 'grouped', 'group-label', 'group-options'];
+        'empty-message', 'multiple', 'clearable', 'disabled', 'grouped', 'group-label', 'group-options', 'teleport'];
 @endphp
 
 @once
@@ -429,7 +429,9 @@
 
     {{-- Dropdown panel teleported to <body> so it is never clipped by a parent
          stacking context, overflow:hidden, or transform on an ancestor element. --}}
-    <template x-teleport="body">
+    @if($teleport)
+        <template x-teleport="body">
+    @endif
     <div
         x-show="isOpen"
         x-cloak
@@ -505,5 +507,7 @@
             @endif
         </div>
     </div>
-    </template>
+    @if($teleport)
+        </template>
+    @endif
 </div>
