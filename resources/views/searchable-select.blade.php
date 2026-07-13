@@ -1,26 +1,35 @@
 @php
     $wireModelKey = $attributes->whereStartsWith('wire:model')->first();
 
+    $xModelValue = $attributes->get('x-model');
+    $hasXModel   = (bool) $xModelValue;
+
     $alpineOptions = [];
     if ($grouped) {
         foreach ($options as $group) {
             $groupLabelText = is_array($group) ? $group[$groupLabel] : $group->{$groupLabel};
-            $groupItems = is_array($group) ? $group[$groupOptions] : $group->{$groupOptions};
+            $groupItems     = is_array($group) ? $group[$groupOptions] : $group->{$groupOptions};
             $items = [];
             foreach ($groupItems as $opt) {
-                $items[] = [
+                $item = [
                     'value' => is_array($opt) ? $opt[$optionValue] : $opt->{$optionValue},
                     'label' => is_array($opt) ? $opt[$optionLabel] : $opt->{$optionLabel},
                 ];
+                if ($optionSubtitle) $item['subtitle'] = is_array($opt) ? ($opt[$optionSubtitle] ?? null) : ($opt->{$optionSubtitle} ?? null);
+                if ($optionIcon)     $item['icon']     = is_array($opt) ? ($opt[$optionIcon]     ?? null) : ($opt->{$optionIcon}     ?? null);
+                $items[] = $item;
             }
             $alpineOptions[] = ['group' => $groupLabelText, 'items' => $items];
         }
     } else {
         foreach ($options as $opt) {
-            $alpineOptions[] = [
+            $item = [
                 'value' => is_array($opt) ? $opt[$optionValue] : $opt->{$optionValue},
                 'label' => is_array($opt) ? $opt[$optionLabel] : $opt->{$optionLabel},
             ];
+            if ($optionSubtitle) $item['subtitle'] = is_array($opt) ? ($opt[$optionSubtitle] ?? null) : ($opt->{$optionSubtitle} ?? null);
+            if ($optionIcon)     $item['icon']     = is_array($opt) ? ($opt[$optionIcon]     ?? null) : ($opt->{$optionIcon}     ?? null);
+            $alpineOptions[] = $item;
         }
     }
 
@@ -37,8 +46,13 @@
         }
     }
 
-    $skipAttrs = ['options', 'option-value', 'option-label', 'placeholder', 'search-placeholder',
-        'empty-message', 'multiple', 'clearable', 'disabled', 'grouped', 'group-label', 'group-options'];
+    $skipAttrs = [
+        'options', 'option-value', 'option-label', 'option-subtitle', 'option-icon',
+        'placeholder', 'search-placeholder', 'empty-message',
+        'multiple', 'clearable', 'disabled', 'grouped', 'group-label', 'group-options',
+        'searchable', 'max-height', 'min-length', 'placement', 'max-tags', 'async',
+        'x-model',
+    ];
 @endphp
 
 @once
@@ -60,27 +74,33 @@
             disabled: config.disabled ?? false,
             grouped: config.grouped ?? false,
             wireModelKey: config.wireModelKey ?? null,
+            searchable: config.searchable ?? true,
+            maxHeight: config.maxHeight ?? '240px',
+            minLength: config.minLength ?? 0,
+            placement: config.placement ?? 'auto',
+            maxTags: config.maxTags ?? 0,
+            async: config.async ?? false,
+            isLoading: false,
 
-            // Dropdown positioning (fixed, so it always clears other elements)
+            // Dropdown positioning
             dropdownX: 0,
             dropdownY: 0,
             dropdownBottom: 0,
             dropdownWidth: 0,
             dropdownOpenUpward: false,
+            dropdownZIndex: 9999,
 
             _onNavigating: null,
             _onNavigated: null,
             _onScroll: null,
             _onResize: null,
-            _refreshOptions: null,
+            _onMorphed: null,
+            _onDocumentMousedown: null,
             _syncing: false,
 
             init() {
                 if (this.wireModelKey && this.$wire) {
                     try {
-                        // Alpine.raw() unwraps Livewire 4 reactive proxies back to plain values.
-                        // The object guard rejects any proxy that wasn't fully unwrapped (e.g.
-                        // the entire $wire proxy being returned instead of the property value).
                         const safeRaw = (v) => {
                             const r = (window.Alpine?.raw) ? Alpine.raw(v) : v;
                             return (r !== null && r !== undefined && typeof r === 'object' && !Array.isArray(r))
@@ -110,29 +130,78 @@
                 this._onNavigating = () => this.close();
                 this._onNavigated = () => { this.search = ''; };
 
-                // Reposition while open so the dropdown tracks the trigger on scroll/resize
                 this._onScroll = () => { if (this.isOpen) this.updatePosition(); };
                 this._onResize = () => { if (this.isOpen) this.updatePosition(); };
 
-                // Livewire re-renders update the DOM but don't re-run x-data. Read fresh
-                // options from data attributes that Livewire's morphdom DOES update.
-                this._refreshOptions = () => {
+                // Refresh options from data attributes after Livewire morphs the DOM.
+                // Also clears the async loading state so the spinner goes away.
+                this._onMorphed = () => {
                     try {
                         const opts = this.$el.getAttribute('data-searchable-options');
                         const map  = this.$el.getAttribute('data-searchable-labels');
-                        if (opts !== null) this.options    = JSON.parse(opts);
-                        if (map  !== null) this.labelsMap  = JSON.parse(map);
+                        if (opts !== null) this.options   = JSON.parse(opts);
+                        if (map  !== null) this.labelsMap = JSON.parse(map);
                     } catch (e) {}
+                    if (this.async) this.isLoading = false;
                 };
 
-                // Always read options from data attributes on init. This is more reliable
-                // than x-data JSON in Livewire 4, where the attribute is re-evaluated
-                // after hydration and entity-encoded JSON can parse incorrectly.
-                this._refreshOptions();
+                this._onMorphed();
+
+                // Async mode: fire a Livewire event when search changes so the
+                // parent component can update $options server-side.
+                if (this.async) {
+                    this.$watch('search', (value) => {
+                        const q = value.trim();
+                        if (q.length >= (this.minLength || 0)) {
+                            this.isLoading = true;
+                            if (this.$wire) {
+                                try {
+                                    this.$wire.dispatch('searchable-select:search', {
+                                        query: q,
+                                        key: this.wireModelKey,
+                                    });
+                                } catch (_) {}
+                            }
+                        }
+                    });
+                }
+
+                // Close on mousedown outside the trigger or dropdown panel.
+                // Using mousedown (not click) so it fires before focus changes and
+                // is not blocked by stopPropagation on inner elements. Capture phase
+                // ensures we see the event even if a child handler stops bubbling.
+                // This replaces the old transparent full-screen backdrop div, which
+                // intercepted scroll/hover events and froze the rest of the page.
+                this._onDocumentMousedown = (e) => {
+                    if (!this.isOpen) return;
+                    if (this.$refs.trigger?.contains(e.target)) return;
+                    if (this.$refs.dropdownPanel?.contains(e.target)) return;
+                    this.close();
+                };
+
+                // Flux (and any library that uses the native <dialog> element with
+                // showModal()) places the dialog in the browser's top layer — a
+                // rendering surface that sits above ALL other content regardless of
+                // z-index. Our dropdown is teleported to <body> and lives in the
+                // normal stacking context, so it can never beat the top layer.
+                //
+                // Fix: if this component is inside a <dialog>, move the already-
+                // teleported panel into the dialog after Alpine finishes its init
+                // tick. The panel is then in the top layer alongside the dialog and
+                // renders above the modal backdrop correctly. position:fixed
+                // coordinates still work because fixed positioning in the top layer
+                // is always relative to the viewport.
+                this.$nextTick(() => {
+                    const dialog = this.$el.closest('dialog');
+                    if (dialog && this.$refs.dropdownPanel) {
+                        dialog.appendChild(this.$refs.dropdownPanel);
+                    }
+                });
 
                 document.addEventListener('livewire:navigating', this._onNavigating);
                 document.addEventListener('livewire:navigated',  this._onNavigated);
-                document.addEventListener('livewire:morphed',    this._refreshOptions);
+                document.addEventListener('livewire:morphed',    this._onMorphed);
+                document.addEventListener('mousedown', this._onDocumentMousedown, true);
                 window.addEventListener('scroll', this._onScroll, { passive: true, capture: true });
                 window.addEventListener('resize', this._onResize, { passive: true });
             },
@@ -140,20 +209,27 @@
             destroy() {
                 document.removeEventListener('livewire:navigating', this._onNavigating);
                 document.removeEventListener('livewire:navigated',  this._onNavigated);
-                document.removeEventListener('livewire:morphed',    this._refreshOptions);
+                document.removeEventListener('livewire:morphed',    this._onMorphed);
+                document.removeEventListener('mousedown', this._onDocumentMousedown, true);
                 window.removeEventListener('scroll', this._onScroll, true);
                 window.removeEventListener('resize', this._onResize);
             },
 
-            // Compute fixed-position coordinates from the trigger's bounding rect.
-            // position:fixed uses viewport coords directly — no scroll offset needed.
             updatePosition() {
                 const trigger = this.$refs.trigger;
                 if (!trigger) return;
                 const rect = trigger.getBoundingClientRect();
                 const spaceBelow = window.innerHeight - rect.bottom;
-                const maxH = 304; // matches max-h-76 below (~19 rem)
-                this.dropdownOpenUpward = spaceBelow < maxH && rect.top > spaceBelow;
+                const maxH = 304;
+
+                if (this.placement === 'top') {
+                    this.dropdownOpenUpward = true;
+                } else if (this.placement === 'bottom') {
+                    this.dropdownOpenUpward = false;
+                } else {
+                    this.dropdownOpenUpward = spaceBelow < maxH && rect.top > spaceBelow;
+                }
+
                 this.dropdownX      = rect.left;
                 this.dropdownY      = rect.bottom + 4;
                 this.dropdownBottom = window.innerHeight - rect.top + 4;
@@ -168,14 +244,41 @@
             },
 
             get filteredOptions() {
-                if (!this.search.trim()) return this.options;
-                const q = this.search.toLowerCase();
+                // Async mode: server handles filtering, just return current options.
+                if (this.async) {
+                    if (this.minLength > 0 && this.search.trim().length > 0 && this.search.trim().length < this.minLength) return [];
+                    return this.options;
+                }
+                const q = this.search.trim();
+                if (!q) return this.options;
+                // Show all options (no filtering) until minLength is reached.
+                if (this.minLength > 0 && q.length < this.minLength) return [];
+                const ql = q.toLowerCase();
                 if (this.grouped) {
                     return this.options
-                        .map(g => ({ ...g, items: g.items.filter(i => i.label.toLowerCase().includes(q)) }))
+                        .map(g => ({ ...g, items: g.items.filter(i => i.label.toLowerCase().includes(ql)) }))
                         .filter(g => g.items.length > 0);
                 }
-                return this.options.filter(o => o.label.toLowerCase().includes(q));
+                return this.options.filter(o => o.label.toLowerCase().includes(ql));
+            },
+
+            get showMinLengthHint() {
+                return this.minLength > 0 && this.search.trim().length > 0 && this.search.trim().length < this.minLength;
+            },
+
+            get charsNeeded() {
+                return this.minLength - this.search.trim().length;
+            },
+
+            get visibleTags() {
+                if (!Array.isArray(this.selected)) return [];
+                if (!this.maxTags) return this.selected;
+                return this.selected.slice(0, this.maxTags);
+            },
+
+            get hiddenTagCount() {
+                if (!Array.isArray(this.selected) || !this.maxTags) return 0;
+                return Math.max(0, this.selected.length - this.maxTags);
             },
 
             getLabel(value) {
@@ -190,12 +293,36 @@
                 return this.selected !== null && String(this.selected) === String(value);
             },
 
+            // Walk up the DOM to find the highest z-index ancestor and float one above
+            // it. Handles any stacking-context scenario: Flux modals (~50), third-party
+            // modals at z-index 10000+, or CSS transforms that create new stacking
+            // contexts. Baseline of 9999 applies when no ancestor exceeds that value.
+            _resolveZIndex() {
+                let z = 9999;
+                let node = this.$el?.parentElement;
+                while (node && node !== document.body) {
+                    const computed = parseInt(getComputedStyle(node).zIndex);
+                    if (!isNaN(computed) && computed > 0) {
+                        z = Math.max(z, computed + 1);
+                    }
+                    node = node.parentElement;
+                }
+                this.dropdownZIndex = z;
+            },
+
             open() {
                 if (this.disabled || this.isOpen) return;
+                this._resolveZIndex();
                 this.updatePosition();
                 this.isOpen = true;
                 this.highlightedIndex = -1;
-                this.$nextTick(() => this.$refs.searchInput?.focus());
+                this.$nextTick(() => {
+                    if (this.searchable) {
+                        this.$refs.searchInput?.focus();
+                    } else {
+                        this.$refs.optionsList?.focus();
+                    }
+                });
             },
 
             close() {
@@ -203,6 +330,7 @@
                 this.isOpen = false;
                 this.search = '';
                 this.highlightedIndex = -1;
+                this.isLoading = false;
             },
 
             toggle() {
@@ -222,6 +350,16 @@
                     this.selected = value;
                     this.close();
                 }
+            },
+
+            selectAll() {
+                if (!this.multiple) return;
+                this.selected = this.flatOptions.map(o => o.value);
+            },
+
+            deselectAll() {
+                if (!this.multiple) return;
+                this.selected = [];
             },
 
             removeTag(value) {
@@ -305,7 +443,14 @@
         wireModelKey: {{ json_encode($wireModelKey) }},
         options: {{ json_encode($alpineOptions) }},
         labelsMap: {{ json_encode((object) $labelsMap) }},
+        searchable: {{ $searchable ? 'true' : 'false' }},
+        maxHeight: '{{ $maxHeight }}',
+        minLength: {{ $minLength }},
+        placement: '{{ $placement }}',
+        maxTags: {{ $maxTags }},
+        async: {{ $async ? 'true' : 'false' }},
     })"
+    @if($hasXModel) x-modelable="selected" x-model="{{ $xModelValue }}" @endif
     @keydown="handleKeydown"
     data-searchable-options="{{ json_encode($alpineOptions) }}"
     data-searchable-labels="{{ json_encode($labelsMap) }}"
@@ -327,7 +472,7 @@
                 {{-- Multi-select tags --}}
                 <template x-if="multiple && Array.isArray(selected) && selected.length > 0">
                     <div class="flex flex-wrap gap-1.5">
-                        <template x-for="val in selected" :key="val">
+                        <template x-for="val in visibleTags" :key="val">
                             <span class="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 max-w-full">
                                 <span class="truncate" x-text="getLabel(val)"></span>
                                 <span
@@ -340,6 +485,11 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
                                 </span>
+                            </span>
+                        </template>
+                        <template x-if="hiddenTagCount > 0">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 dark:bg-zinc-700 dark:text-gray-300">
+                                +<span x-text="hiddenTagCount"></span> more
                             </span>
                         </template>
                     </div>
@@ -386,13 +536,13 @@
         </div>
     </div>
 
-    {{-- Backdrop: closes dropdown on outside click, immune to Livewire morphing --}}
-    <div x-show="isOpen" x-cloak class="fixed inset-0 z-[9998]" @click="close()" style="background: transparent;"></div>
-
     {{-- Dropdown panel teleported to <body> so it is never clipped by a parent
-         stacking context, overflow:hidden, or transform on an ancestor element. --}}
+         stacking context, overflow:hidden, or transform on an ancestor element.
+         Click-outside is handled by a document mousedown listener (see init) rather
+         than a full-screen backdrop, so scroll and hover events are never blocked. --}}
     <template x-teleport="body">
     <div
+        x-ref="dropdownPanel"
         x-show="isOpen"
         x-cloak
         x-transition:enter="transition ease-out duration-100"
@@ -407,23 +557,61 @@
             width:  dropdownWidth + 'px',
             top:    dropdownOpenUpward ? 'auto' : (dropdownY + 'px'),
             bottom: dropdownOpenUpward ? (dropdownBottom + 'px') : 'auto',
-            zIndex: 9999,
+            zIndex: dropdownZIndex,
         }"
         class="origin-top bg-white dark:bg-zinc-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden"
         role="listbox"
         :aria-multiselectable="multiple"
     >
-        <input
-            x-ref="searchInput"
-            type="text"
-            x-model="search"
-            @click.stop
-            placeholder="{{ $searchPlaceholder }}"
-            class="w-full px-3 py-2.5 border-b border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:outline-none text-sm"
-            aria-label="Search options"
-        >
+        {{-- Search input --}}
+        <template x-if="searchable">
+            <input
+                x-ref="searchInput"
+                type="text"
+                x-model="search"
+                @click.stop
+                @keydown="handleKeydown"
+                placeholder="{{ $searchPlaceholder }}"
+                class="w-full px-3 py-2.5 border-b border-gray-300 dark:border-gray-600 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:outline-none text-sm"
+                aria-label="Search options"
+            >
+        </template>
 
-        <div class="max-h-60 overflow-auto overscroll-contain" x-ref="optionsList">
+        {{-- Select all / Deselect all row (multi-select only) --}}
+        <template x-if="multiple">
+            <div class="flex items-center justify-between px-3 py-1.5 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-zinc-900">
+                <button
+                    type="button"
+                    @click.stop="selectAll()"
+                    class="text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                >Select all</button>
+                <button
+                    type="button"
+                    @click.stop="deselectAll()"
+                    class="text-xs text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+                >Clear all</button>
+            </div>
+        </template>
+
+        {{-- Loading spinner (async mode) --}}
+        <template x-if="isLoading">
+            <div class="px-3 py-4 flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <svg class="animate-spin w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <span>Loading...</span>
+            </div>
+        </template>
+
+        {{-- Options list --}}
+        <div
+            x-show="!isLoading"
+            :style="'max-height: ' + maxHeight + '; overflow-y: auto; overscroll-behavior: contain;'"
+            x-ref="optionsList"
+            tabindex="-1"
+            @keydown="handleKeydown"
+        >
             @if ($grouped)
                 <template x-for="group in filteredOptions" :key="group.group">
                     <div>
@@ -434,7 +622,7 @@
                         <template x-for="option in group.items" :key="option.value">
                             <div
                                 @click="select(option.value)"
-                                class="px-3 py-2.5 cursor-pointer flex items-center justify-between transition-colors"
+                                class="px-3 py-2.5 cursor-pointer flex items-center gap-2.5 transition-colors"
                                 :class="{
                                     'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300': isSelected(option.value),
                                     'hover:bg-gray-100 dark:hover:bg-gray-700': !isSelected(option.value),
@@ -444,23 +632,27 @@
                                 role="option"
                                 :aria-selected="isSelected(option.value)"
                             >
-                                <span x-text="option.label" class="truncate"></span>
-                                <svg x-show="isSelected(option.value)" class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                                <template x-if="option.icon">
+                                    <img :src="option.icon" class="w-6 h-6 rounded-full object-cover flex-shrink-0" alt="" />
+                                </template>
+                                <div class="flex-1 min-w-0">
+                                    <span x-text="option.label" class="block truncate"></span>
+                                    <template x-if="option.subtitle">
+                                        <span x-text="option.subtitle" class="block truncate text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-tight"></span>
+                                    </template>
+                                </div>
+                                <svg x-show="isSelected(option.value)" class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 ml-auto" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
                         </template>
                     </div>
                 </template>
-                <div
-                    x-show="filteredOptions.length === 0"
-                    class="px-3 py-3 text-gray-500 dark:text-gray-400 text-sm text-center"
-                >{{ $emptyMessage }}</div>
             @else
                 <template x-for="(option, index) in filteredOptions" :key="option.value">
                     <div
                         @click="select(option.value)"
-                        class="px-3 py-2.5 cursor-pointer flex items-center justify-between transition-colors"
+                        class="px-3 py-2.5 cursor-pointer flex items-center gap-2.5 transition-colors"
                         :class="{
                             'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300': isSelected(option.value),
                             'hover:bg-gray-100 dark:hover:bg-gray-700': !isSelected(option.value),
@@ -470,17 +662,34 @@
                         role="option"
                         :aria-selected="isSelected(option.value)"
                     >
-                        <span x-text="option.label" class="truncate"></span>
-                        <svg x-show="isSelected(option.value)" class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                        <template x-if="option.icon">
+                            <img :src="option.icon" class="w-6 h-6 rounded-full object-cover flex-shrink-0" alt="" />
+                        </template>
+                        <div class="flex-1 min-w-0">
+                            <span x-text="option.label" class="block truncate"></span>
+                            <template x-if="option.subtitle">
+                                <span x-text="option.subtitle" class="block truncate text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-tight"></span>
+                            </template>
+                        </div>
+                        <svg x-show="isSelected(option.value)" class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 ml-auto" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                         </svg>
                     </div>
                 </template>
-                <div
-                    x-show="filteredOptions.length === 0"
-                    class="px-3 py-3 text-gray-500 dark:text-gray-400 text-sm text-center"
-                >{{ $emptyMessage }}</div>
             @endif
+
+            {{-- Min-length hint --}}
+            <div
+                x-show="showMinLengthHint"
+                x-cloak
+                class="px-3 py-3 text-gray-500 dark:text-gray-400 text-sm text-center"
+            >Type <span x-text="charsNeeded"></span> more character<span x-show="charsNeeded !== 1">s</span> to search</div>
+
+            {{-- Empty message --}}
+            <div
+                x-show="!showMinLengthHint && filteredOptions.length === 0"
+                class="px-3 py-3 text-gray-500 dark:text-gray-400 text-sm text-center"
+            >{{ $emptyMessage }}</div>
         </div>
     </div>
     </template>

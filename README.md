@@ -19,8 +19,14 @@ A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 
 - [Usage Examples](#usage-examples)
   - [Basic Single Select](#basic-single-select)
   - [Multi-Select](#multi-select)
+  - [Multi-Select with Tag Overflow](#multi-select-with-tag-overflow)
   - [Dependent/Cascading Dropdowns](#dependentcascading-dropdowns)
   - [Grouped Options](#grouped-options)
+  - [Option Subtitles and Icons](#option-subtitles-and-icons)
+  - [Async / Server-Side Search](#async--server-side-search)
+  - [Search Toggle and Min-Length](#search-toggle-and-min-length)
+  - [Dropdown Placement and Height](#dropdown-placement-and-height)
+  - [x-model Support (Non-Livewire)](#x-model-support-non-livewire)
   - [Custom Keys](#custom-keys)
   - [With Validation](#with-validation)
   - [Disabled State](#disabled-state)
@@ -37,11 +43,21 @@ A powerful, feature-rich searchable dropdown component for Laravel Livewire 3 & 
 ## Features
 
 - **Real-time search** - Client-side filtering as you type
+- **Async / server-side search** - Fire a Livewire event on keystroke and let the server return filtered options
 - **Multi-select support** - Select multiple options with visual tags/badges
+- **Select all / Clear all** - Bulk action buttons in multi-select dropdowns
+- **Tag overflow** - Show the first N tags and a "+X more" badge for long selections
 - **Grouped options** - Organize options into labeled categories
+- **Option subtitles** - Display a second descriptive line per option
+- **Option icons** - Display an image thumbnail alongside each option label
+- **Configurable max-height** - Set dropdown list height to any valid CSS value
+- **Min-length search** - Delay filtering until a minimum number of characters are typed
+- **Forced placement** - Pin the dropdown to always open upward, downward, or auto-detect
+- **Search toggle** - Disable the search input entirely for short option lists
+- **`x-model` support** - Use the component outside Livewire in any Alpine.js context
 - **Clear button** - Quickly clear selections
 - **Dark mode support** - Automatically adapts to your theme
-- **Accessible** - Full keyboard navigation and ARIA attributes
+- **Accessible** - Full keyboard navigation (including from inside the dropdown) and ARIA attributes
 - **Livewire 3 & 4 compatible** - Works seamlessly with both versions
 - **Responsive** - Mobile-friendly and touch-optimized
 - **Disabled state** - Conditional disabling support
@@ -201,66 +217,67 @@ That's it! You now have a fully functional searchable dropdown. The component au
 
 Comprehensive list of all available props:
 
-| Prop | Type | Default | Required | Description |
-|------|------|---------|----------|-------------|
-| `options` | Array/Collection | `[]` | Yes | The list of options to display in the dropdown |
-| `placeholder` | String | `'Select option'` | No | Placeholder text shown when nothing is selected |
-| `searchPlaceholder` | String | `'Search...'` | No | Placeholder for the search input field |
-| `disabled` | Boolean | `false` | No | Whether the dropdown is disabled |
-| `emptyMessage` | String | `'No options available'` | No | Message shown when the options array is empty |
-| `optionValue` | String | `'id'` | No | The key/property to use as the option value |
-| `optionLabel` | String | `'name'` | No | The key/property to use as the option display label |
-| `multiple` | Boolean | `false` | No | Enable multi-select mode (allows selecting multiple options) |
-| `clearable` | Boolean | `true` | No | Show/hide the clear button |
-| `grouped` | Boolean | `false` | No | Enable grouped/categorized options mode |
-| `groupLabel` | String | `'label'` | No | Key for group labels (when `grouped` is true) |
-| `groupOptions` | String | `'options'` | No | Key for group options array (when `grouped` is true) |
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `options` | Array/Collection | `[]` | The list of options to display |
+| `option-value` | String | `'id'` | Key/property to use as the option value |
+| `option-label` | String | `'name'` | Key/property to use as the display label |
+| `option-subtitle` | String | `''` | Key/property for a second descriptive line per option |
+| `option-icon` | String | `''` | Key/property for an image URL shown per option |
+| `placeholder` | String | `'Select option'` | Placeholder shown when nothing is selected |
+| `search-placeholder` | String | `'Search...'` | Placeholder for the search input |
+| `empty-message` | String | `'No options available'` | Message shown when no options match |
+| `multiple` | Boolean | `false` | Enable multi-select mode |
+| `clearable` | Boolean | `true` | Show/hide the × clear button |
+| `disabled` | Boolean | `false` | Disable the dropdown |
+| `searchable` | Boolean | `true` | Show/hide the search input |
+| `max-height` | String | `'240px'` | Max height of the options list — any valid CSS value (`px`, `rem`, `vh`) |
+| `min-length` | Integer | `0` | Min characters required before filtering begins; shows a hint below the threshold |
+| `placement` | String | `'auto'` | Dropdown direction: `'auto'` \| `'top'` \| `'bottom'` |
+| `max-tags` | Integer | `0` | Multi-select: max tags to show; extras collapse to "+N more" badge. `0` = unlimited |
+| `async` | Boolean | `false` | Server-side search mode — dispatches a Livewire `searchable-select:search` event on each keystroke |
+| `grouped` | Boolean | `false` | Enable grouped/categorized options |
+| `group-label` | String | `'label'` | Key for group headers (when `grouped` is true) |
+| `group-options` | String | `'options'` | Key for the options array within each group |
 
-> **`wire:model`** is a standard Livewire directive, not a declared prop. Pass it as `wire:model="propertyName"` and the component handles two-way binding automatically.
+> **`wire:model`** is a standard Livewire directive, not a declared prop. Pass it as `wire:model="propertyName"` and the component handles two-way sync automatically.
+>
+> **`x-model`** is supported for Alpine.js-only usage (no Livewire). See [x-model Support](#x-model-support-non-livewire).
 
 ### Props Explanation
 
-#### Core Props
+#### Data Source
 
-- **`options`**: The data source for your dropdown. Can be:
-  - Eloquent Collection: `Country::all()`
-  - Array of objects: `[['id' => 1, 'name' => 'USA'], ...]`
-  - Array of arrays: See above
+- **`options`** — The data source. Accepts Eloquent Collections, arrays of associative arrays, or arrays of objects.
+- **`option-value`** — Which field to save as the selected value (synced to `wire:model`).
+- **`option-label`** — Which field to display in the dropdown.
+- **`option-subtitle`** — Optional field for a second, smaller line of text inside each option row.
+- **`option-icon`** — Optional field for an image URL displayed as a small thumbnail in each option row.
 
-- **`wire:model`**: The Livewire property to bind to. The component uses `$wire.entangle()` internally to keep the selected value in sync automatically.
+#### Display
 
-#### Labeling Props
+- **`placeholder`** — Shown when nothing is selected.
+- **`search-placeholder`** — Shown inside the search input.
+- **`empty-message`** — Shown when the options list is empty or no results match.
+- **`max-height`** — Controls how tall the scrollable options list can grow. Accepts any CSS length: `'300px'`, `'20rem'`, `'40vh'`.
 
-- **`placeholder`**: Shows when no option is selected
-- **`searchPlaceholder`**: Shows in the search input
-- **`emptyMessage`**: Shows when `options` array is empty
+#### Behaviour
 
-#### Data Mapping Props
+- **`searchable`** — Set to `false` to hide the search input (useful for short, well-known lists).
+- **`min-length`** — Set to `2` or `3` to suppress filtering until the user has typed enough characters. A hint ("Type 1 more character…") appears below the threshold.
+- **`placement`** — `'auto'` detects available space; `'top'` / `'bottom'` forces a direction regardless of space.
+- **`async`** — Delegates filtering to the server. The component shows a spinner and dispatches `searchable-select:search` on every keystroke. See [Async / Server-Side Search](#async--server-side-search).
 
-- **`optionValue`**: Which property to use as the value (saved to `wire:model`)
-- **`optionLabel`**: Which property to display to users
+#### Multi-Select
 
-Example:
-```php
-// If your model has 'code' and 'country_name' fields
-$countries = Country::all(); // [['code' => 'US', 'country_name' => 'United States'], ...]
-```
+- **`multiple`** — Enables tag-style multi-select.
+- **`max-tags`** — Show at most N tags in the trigger; remaining tags collapse to a "+X more" badge.
+- **`clearable`** — Shows/hides the × clear-all button.
 
-```blade
-<x-searchable-select
-    wire:model="country_code"
-    :options="$countries"
-    option-value="code"
-    option-label="country_name"
-/>
-```
+#### Grouping
 
-#### Feature Flags
-
-- **`multiple`**: Enables multi-select mode with visual tags
-- **`clearable`**: Shows/hides the × button to clear selection
-- **`disabled`**: Grays out the component and prevents interaction
-- **`grouped`**: Enables category headers in the dropdown
+- **`grouped`** — Enables group headers in the dropdown list.
+- **`group-label`** / **`group-options`** — Map to the keys in your grouped data structure.
 
 
 ## Usage Examples
@@ -349,8 +366,23 @@ class UserSkills extends Component
 @endif
 ```
 
-Selected items show as blue badges with × remove buttons.
+Selected items show as blue badges with × remove buttons. The dropdown header also shows **Select all** and **Clear all** buttons automatically when `multiple` is true.
 
+### Multi-Select with Tag Overflow
+
+Prevent the trigger from growing too tall when many items are selected by capping the visible tag count:
+
+```blade
+<x-searchable-select
+    wire:model="selected_skills"
+    :options="$skills"
+    :multiple="true"
+    :max-tags="3"
+    placeholder="Select skills"
+/>
+```
+
+With `:max-tags="3"`, selecting 7 items renders 3 tags and a `+4 more` badge. All 7 remain selected — only the display is condensed.
 
 ### Dependent/Cascading Dropdowns
 
@@ -545,6 +577,201 @@ public $categories = [
 />
 ```
 
+### Option Subtitles and Icons
+
+Add context to each option row without publishing or customizing the view.
+
+**Subtitle** — a second, smaller line of text:
+
+```php
+public $users = [
+    ['id' => 1, 'name' => 'Alice Johnson', 'email' => 'alice@example.com'],
+    ['id' => 2, 'name' => 'Bob Smith',     'email' => 'bob@example.com'],
+];
+```
+
+```blade
+<x-searchable-select
+    wire:model="user_id"
+    :options="$users"
+    option-subtitle="email"
+    placeholder="Select a user"
+/>
+```
+
+**Icon** — an image URL displayed as a small thumbnail (works well with avatars or flag images):
+
+```php
+public $countries = [
+    ['id' => 1, 'name' => 'Uganda',  'flag' => 'https://flagcdn.com/w40/ug.png'],
+    ['id' => 2, 'name' => 'Kenya',   'flag' => 'https://flagcdn.com/w40/ke.png'],
+];
+```
+
+```blade
+<x-searchable-select
+    wire:model="country_id"
+    :options="$countries"
+    option-icon="flag"
+    placeholder="Select a country"
+/>
+```
+
+Both props can be combined:
+
+```blade
+<x-searchable-select
+    wire:model="user_id"
+    :options="$users"
+    option-subtitle="email"
+    option-icon="avatar_url"
+    placeholder="Select a user"
+/>
+```
+
+### Async / Server-Side Search
+
+Use `:async="true"` when your options list is too large to load upfront. The component shows a loading spinner and dispatches a `searchable-select:search` Livewire event on every keystroke. Your component listens with `#[On]` and updates `$options`.
+
+**Livewire component:**
+
+```php
+<?php
+
+namespace App\Livewire;
+
+use App\Models\Country;
+use Livewire\Attributes\On;
+use Livewire\Component;
+
+class CountryPicker extends Component
+{
+    public ?int $country_id = null;
+    public array $countries = [];
+
+    public function mount(): void
+    {
+        // Optionally pre-load a default set
+        $this->countries = Country::limit(20)->get()->toArray();
+    }
+
+    #[On('searchable-select:search')]
+    public function search(string $query, ?string $key): void
+    {
+        // $key is the wire:model property name — useful when multiple
+        // async selects share the same Livewire component
+        if ($key !== 'country_id') return;
+
+        $this->countries = Country::where('name', 'like', "%{$query}%")
+            ->limit(50)
+            ->get()
+            ->toArray();
+    }
+
+    public function render()
+    {
+        return view('livewire.country-picker');
+    }
+}
+```
+
+**Blade view:**
+
+```blade
+<x-searchable-select
+    wire:model="country_id"
+    :options="$countries"
+    :async="true"
+    placeholder="Type to search countries..."
+/>
+```
+
+After each keystroke, Livewire re-renders the component with the filtered `$countries`. The component reads the updated options from the DOM and hides the spinner automatically.
+
+**Combine with `min-length`** to avoid firing requests on every single character:
+
+```blade
+<x-searchable-select
+    wire:model="country_id"
+    :options="$countries"
+    :async="true"
+    :min-length="2"
+    placeholder="Type 2+ characters to search..."
+/>
+```
+
+### Search Toggle and Min-Length
+
+**Disable search** for short lists where a search box adds no value:
+
+```blade
+<x-searchable-select
+    wire:model="status"
+    :options="$statuses"
+    :searchable="false"
+    placeholder="Select a status"
+/>
+```
+
+**Min-length** delays filtering until a minimum number of characters are typed. All options remain visible until the threshold is crossed:
+
+```blade
+<x-searchable-select
+    wire:model="country_id"
+    :options="$countries"
+    :min-length="2"
+    search-placeholder="Type 2+ chars to filter..."
+/>
+```
+
+When the user types 1 character with `min-length="2"`, the list shows a hint: *"Type 1 more character to search"*. Once the threshold is met, normal client-side filtering kicks in.
+
+### Dropdown Placement and Height
+
+**Force direction** — useful when the component is near the bottom of the viewport:
+
+```blade
+{{-- Always open upward --}}
+<x-searchable-select wire:model="country_id" :options="$countries" placement="top" />
+
+{{-- Always open downward --}}
+<x-searchable-select wire:model="country_id" :options="$countries" placement="bottom" />
+
+{{-- Auto-detect (default) --}}
+<x-searchable-select wire:model="country_id" :options="$countries" placement="auto" />
+```
+
+**Custom max-height** — accepts any valid CSS length value:
+
+```blade
+{{-- Compact: ~3 visible options --}}
+<x-searchable-select wire:model="country_id" :options="$countries" max-height="120px" />
+
+{{-- Tall: half the viewport height --}}
+<x-searchable-select wire:model="country_id" :options="$countries" max-height="50vh" />
+
+{{-- Default --}}
+<x-searchable-select wire:model="country_id" :options="$countries" max-height="240px" />
+```
+
+### x-model Support (Non-Livewire)
+
+The component supports Alpine.js `x-model` for use outside of Livewire — in static Blade views, modals, or any Alpine-powered context:
+
+```blade
+<div x-data="{ selectedId: null }">
+    <x-searchable-select
+        x-model="selectedId"
+        :options="$countries"
+        placeholder="Select a country"
+    />
+
+    <p x-text="'Selected: ' + selectedId"></p>
+</div>
+```
+
+`x-model` and `wire:model` are mutually exclusive — use `wire:model` inside Livewire components and `x-model` everywhere else.
+
 ### Custom Keys
 
 When your data uses different property names:
@@ -733,19 +960,30 @@ Build reusable components for common patterns:
 
 ### Server-Side Search (Large Datasets)
 
-For thousands of records, implement server-side search:
+For thousands of records, use the built-in `:async="true"` prop. The component fires a `searchable-select:search` Livewire event on every keystroke, shows a spinner while the server responds, and refreshes its option list automatically once Livewire re-renders.
 
 ```php
-public $searchTerm = '';
-public $countries = [];
+use Livewire\Attributes\On;
 
-public function updatedSearchTerm($value)
+#[On('searchable-select:search')]
+public function search(string $query, ?string $key): void
 {
-    $this->countries = Country::where('name', 'like', "%{$value}%")
+    $this->countries = Country::where('name', 'like', "%{$query}%")
         ->limit(50)
-        ->get();
+        ->get()
+        ->toArray();
 }
 ```
+
+```blade
+<x-searchable-select
+    wire:model="country_id"
+    :options="$countries"
+    :async="true"
+/>
+```
+
+See [Async / Server-Side Search](#async--server-side-search) for the full example including `min-length` debouncing.
 
 ## Customization Guide
 
@@ -1076,10 +1314,18 @@ Visit `http://localhost:8000`
 
 The demo is a single consolidated page at `/` showcasing:
 - Basic single-select
-- Multi-select with badges
+- Multi-select with Select all / Clear all buttons
+- Multi-select with `max-tags` overflow badge
 - Grouped options
-- Preselected values
+- Option subtitle (second line per option)
+- Search disabled (`searchable=false`)
+- Min-length filtering hint
+- Forced placement (`placement="top"`)
+- Custom max-height
+- Async / server-side search with loading spinner
+- Pre-selected values
 - Disabled state
+- Regression test (Livewire round-trip must not open the dropdown)
 
 ### Demo Source Code
 
@@ -1141,12 +1387,27 @@ The component is designed for Livewire. For Inertia.js, consider using a Vue/Rea
 
 ### How do I add icons to options?
 
-Publish the view and customize the option rendering to include icons:
+Use the built-in `option-icon` prop — no view publishing required. Point it at the field on your data that holds an image URL:
+
 ```blade
-<div>
-    <img src="{{ $option->flag }}" class="w-4 h-4 inline mr-2">
-    {{ $option->name }}
-</div>
+<x-searchable-select
+    wire:model="country_id"
+    :options="$countries"
+    option-icon="flag_url"
+    placeholder="Select a country"
+/>
+```
+
+The image is rendered as a 24×24 rounded thumbnail beside the label. Combine with `option-subtitle` for a label + sub-text + icon row:
+
+```blade
+<x-searchable-select
+    wire:model="user_id"
+    :options="$users"
+    option-icon="avatar_url"
+    option-subtitle="email"
+    placeholder="Select a user"
+/>
 ```
 
 ## Contributing

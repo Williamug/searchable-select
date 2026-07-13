@@ -1,160 +1,193 @@
-# 🚀 Searchable Select - Quick Reference Card
+# Searchable Select — Quick Reference
 
-## Installation (30 seconds)
+## Installation
 
 ```bash
 composer require williamug/searchable-select
 ```
 
-That's it! Ready to use with Tailwind CSS.
-
-## Basic Usage (Copy & Paste)
-
-### Livewire Component
+## Basic Usage
 
 ```php
-<?php
-namespace App\Livewire;
+// Livewire component
+public ?int $country_id = null;
+public array $countries;
 
-use App\Models\Country;
-use Livewire\Component;
-
-class MyForm extends Component
+public function mount(): void
 {
-    public $countries;
-    public $country_id;
-
-    public function mount()
-    {
-        $this->countries = Country::all();
-    }
-
-    public function render()
-    {
-        return view('livewire.my-form');
-    }
+    $this->countries = Country::orderBy('name')->get()->toArray();
 }
 ```
 
-### Blade View
-
 ```blade
 <x-searchable-select
+    wire:model="country_id"
     :options="$countries"
-    wire-model="country_id"
-    :selected-value="$country_id"
     placeholder="Select a country"
 />
 ```
 
-## Switch to Bootstrap (2 minutes)
-
-```bash
-# 1. Publish config
-php artisan vendor:publish --tag=searchable-select-config
-
-# 2. Edit .env
-echo "SEARCHABLE_SELECT_THEME=bootstrap" >> .env
-
-# 3. Clear cache
-php artisan config:clear
-```
-
-Add to layout:
-```html
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-```
-
-## Common Props
+## All Props at a Glance
 
 ```blade
 <x-searchable-select
-    :options="$data"                           {{-- Array/Collection --}}
-    wire-model="field"                         {{-- Required --}}
-    :selected-value="$field"                   {{-- For reactivity --}}
-    placeholder="Select..."                    {{-- Default text --}}
-    search-placeholder="Search..."             {{-- Search input text --}}
-    :multiple="true"                           {{-- Multi-select --}}
-    :disabled="false"                          {{-- Disable dropdown --}}
-    :clearable="true"                          {{-- Show clear button --}}
-    option-value="id"                          {{-- Value key --}}
-    option-label="name"                        {{-- Display key --}}
-    theme="bootstrap"                          {{-- Override theme --}}
+    wire:model="field"                {{-- Livewire two-way binding --}}
+    :options="$data"                  {{-- Array or Collection --}}
+    option-value="id"                 {{-- Value field (default: 'id') --}}
+    option-label="name"               {{-- Label field (default: 'name') --}}
+    option-subtitle="description"     {{-- Optional second line per option --}}
+    option-icon="avatar_url"          {{-- Optional image thumbnail per option --}}
+    placeholder="Select..."           {{-- Trigger placeholder --}}
+    search-placeholder="Search..."    {{-- Search input placeholder --}}
+    empty-message="No results"        {{-- Shown when list is empty --}}
+    :multiple="true"                  {{-- Multi-select with tags --}}
+    :max-tags="3"                     {{-- Collapse excess tags to '+N more' --}}
+    :clearable="true"                 {{-- Show × clear button --}}
+    :disabled="false"                 {{-- Disable the dropdown --}}
+    :searchable="true"                {{-- Show/hide the search input --}}
+    max-height="240px"                {{-- Options list height (any CSS value) --}}
+    :min-length="2"                   {{-- Min chars before filtering starts --}}
+    placement="auto"                  {{-- 'auto' | 'top' | 'bottom' --}}
+    :async="false"                    {{-- Server-side search mode --}}
+    :grouped="false"                  {{-- Enable group headers --}}
+    group-label="label"               {{-- Group header key --}}
+    group-options="options"           {{-- Group items key --}}
 />
 ```
 
-## 5 Most Common Patterns
+## Common Patterns
 
-### 1️⃣ Simple Dropdown
+### 1. Simple Dropdown
 ```blade
-<x-searchable-select :options="$countries" wire-model="country_id" :selected-value="$country_id" />
+<x-searchable-select wire:model="country_id" :options="$countries" />
 ```
 
-### 2️⃣ Multi-Select
+### 2. Multi-Select with Tag Cap
 ```blade
-<x-searchable-select :options="$skills" wire-model="skills" :selected-value="$skills" :multiple="true" />
+<x-searchable-select
+    wire:model="skill_ids"
+    :options="$skills"
+    :multiple="true"
+    :max-tags="3"
+    placeholder="Select skills"
+/>
 ```
 
-### 3️⃣ Cascading Dropdowns
+### 3. Cascading Dropdowns
 ```blade
-<x-searchable-select wire-model.live="country_id" :options="$countries" />
-<x-searchable-select wire-model="city_id" :options="$cities" :disabled="!$country_id" />
+<x-searchable-select wire:model="country_id" :options="$countries" />
+<x-searchable-select
+    wire:model="city_id"
+    :options="$cities"
+    :disabled="!$country_id"
+    placeholder="First select a country"
+/>
 ```
 
-### 4️⃣ API Integration
+### 4. Option Subtitle + Icon
 ```blade
-<x-searchable-select api-url="/api/users/search" :options="[]" wire-model="user_id" />
+<x-searchable-select
+    wire:model="user_id"
+    :options="$users"
+    option-subtitle="email"
+    option-icon="avatar_url"
+    placeholder="Select a user"
+/>
 ```
 
-### 5️⃣ Grouped Options
-```blade
-<x-searchable-select :options="$grouped" :grouped="true" wire-model="selection" />
-```
-
-## Data Structures
-
-### Simple Array
+### 5. Async / Server-Side Search
 ```php
-$options = [
-    ['id' => 1, 'name' => 'Option 1'],
-    ['id' => 2, 'name' => 'Option 2'],
-];
+use Livewire\Attributes\On;
+
+#[On('searchable-select:search')]
+public function search(string $query, ?string $key): void
+{
+    $this->countries = Country::where('name', 'like', "%{$query}%")
+        ->limit(50)->get()->toArray();
+}
+```
+```blade
+<x-searchable-select
+    wire:model="country_id"
+    :options="$countries"
+    :async="true"
+    :min-length="2"
+    placeholder="Type to search..."
+/>
 ```
 
-### Eloquent Collection
-```php
-$options = Country::orderBy('name')->get();
+### 6. Grouped Options
+```blade
+<x-searchable-select
+    wire:model="country_id"
+    :options="$grouped"
+    :grouped="true"
+    group-label="label"
+    group-options="options"
+/>
 ```
 
-### Grouped Array
+### 7. No Search Input
+```blade
+<x-searchable-select
+    wire:model="status"
+    :options="$statuses"
+    :searchable="false"
+    placeholder="Select a status"
+/>
+```
+
+### 8. Force Upward / Custom Height
+```blade
+<x-searchable-select
+    wire:model="country_id"
+    :options="$countries"
+    placement="top"
+    max-height="180px"
+/>
+```
+
+### 9. Alpine x-model (No Livewire)
+```blade
+<div x-data="{ selectedId: null }">
+    <x-searchable-select
+        x-model="selectedId"
+        :options="$countries"
+        placeholder="Select a country"
+    />
+</div>
+```
+
+## Grouped Data Structure
+
 ```php
 $options = [
     [
-        'label' => 'Group A',
+        'label'   => 'East Africa',
         'options' => [
-            ['id' => 1, 'name' => 'Item 1'],
-            ['id' => 2, 'name' => 'Item 2'],
-        ]
+            ['id' => 1, 'name' => 'Uganda'],
+            ['id' => 2, 'name' => 'Kenya'],
+        ],
+    ],
+    [
+        'label'   => 'West Africa',
+        'options' => [
+            ['id' => 3, 'name' => 'Ghana'],
+        ],
     ],
 ];
 ```
 
-## Troubleshooting (Quick Fixes)
+## Tailwind Setup
 
-### Dropdown won't open
-```bash
-# Clear caches
-php artisan view:clear
-php artisan optimize:clear
+### v4
+```css
+/* resources/css/app.css */
+@import 'tailwindcss';
+@source '../../vendor/williamug/searchable-select/resources/views/**/*.blade.php';
 ```
 
-### Selected value not showing
-```blade
-{{-- ✅ Always pass :selected-value --}}
-<x-searchable-select :selected-value="$country_id" ... />
-```
-
-### Styling broken (Tailwind)
+### v3
 ```js
 // tailwind.config.js
 export default {
@@ -164,133 +197,54 @@ export default {
   ],
 }
 ```
-```bash
-npm run build
+
+## Validation
+
+```php
+protected $rules = ['country_id' => 'required|exists:countries,id'];
 ```
 
-### Styling broken (Bootstrap)
-```bash
-# Verify config
-php artisan tinker
->>> config('searchable-select.theme');
-=> "bootstrap"
-
-# Clear caches
-php artisan config:clear
-php artisan view:clear
+```blade
+<x-searchable-select wire:model="country_id" :options="$countries" />
+@error('country_id')
+    <span class="text-red-500 text-sm">{{ $message }}</span>
+@enderror
 ```
 
 ## Performance Guidelines
 
-| Dataset Size | Recommendation |
-|--------------|---------------|
-| < 1,000      | Default (client-side) ✅ |
-| 1,000+       | Use API integration ⚡ |
-| 10,000+      | Must use API 🚨 |
+| Options count | Approach |
+|---------------|----------|
+| < 500         | Client-side (default) |
+| 500 – 5 000   | `:async="true"` with `min-length` |
+| 5 000+        | `:async="true"` + database full-text search |
 
-## API Endpoint Example
-
-```php
-// routes/api.php
-Route::get('/users/search', function (Request $request) {
-    return [
-        'data' => User::where('name', 'like', "%{$request->search}%")
-            ->select('id', 'name')
-            ->limit(50)
-            ->get()
-    ];
-});
-```
-
-## Validation Example
-
-```php
-// Component
-protected $rules = [
-    'country_id' => 'required|exists:countries,id',
-];
-```
-
-```blade
-{{-- View --}}
-<x-searchable-select wire-model="country_id" :options="$countries" />
-@error('country_id')
-    <span class="text-red-500">{{ $message }}</span>
-@enderror
-```
-
-## Testing
+## Useful Commands
 
 ```bash
-# Run all tests
-composer test
+# Publish views for customization
+php artisan vendor:publish --tag=searchable-select-views
 
-# Output: 24 passed (46 assertions)
+# Clear view cache
+php artisan view:clear
+
+# Run package tests
+composer test
 ```
 
-## Demo App
+## Run the Demo
 
 ```bash
 cd demo
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
 php artisan serve
 ```
 
-Visit: `http://localhost:8000`
-
-## Essential Commands
-
-```bash
-# Install
-composer require williamug/searchable-select
-
-# Publish config
-php artisan vendor:publish --tag=searchable-select-config
-
-# Publish views (for customization)
-php artisan vendor:publish --tag=searchable-select-views
-
-# Clear caches
-php artisan config:clear && php artisan view:clear
-
-# Run tests
-composer test
-```
-
-## Documentation Files
-
-- **README.md** - Complete documentation (1,700+ lines)
-- **DOCUMENTATION.md** - Documentation overview
-- **DOCS-GUIDE.md** - Visual navigation guide
-- **QUICK-REFERENCE.md** - This file (you are here)
-- **demo/** - Live examples
-
-## Links
-
-- 📦 Package: https://packagist.org/packages/williamug/searchable-select
-- 🐙 GitHub: https://github.com/williamug/searchable-select
-- 🐛 Issues: https://github.com/williamug/searchable-select/issues
-
-## Pro Tips
-
-1. ✅ Always pass `:selected-value` for reactivity
-2. ✅ Use `wire:key` in loops
-3. ✅ API for > 1,000 options
-4. ✅ Debounce with `.live.debounce.300ms`
-5. ✅ Cache static data
-6. ✅ `wire-model.live` for immediate updates
-7. ✅ Clear caches after config changes
-8. ✅ Use Bootstrap theme per component if needed
-
-## Support
-
-Need help? Check:
-1. README.md (comprehensive guide)
-2. Troubleshooting section
-3. Demo app (working examples)
-4. GitHub issues
+Visit `http://localhost:8000`
 
 ---
 
-**Made with ❤️ for Laravel**
-
-⭐ Star the repo if this helps you!
+**[Full README](README.md)** · **[Changelog](CHANGELOG.md)** · **[Packagist](https://packagist.org/packages/williamug/searchable-select)**
