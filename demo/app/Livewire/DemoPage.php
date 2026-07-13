@@ -45,7 +45,7 @@ class DemoPage extends Component
 
     public array $groupedCountries = [
         [
-            'label'   => 'East Africa',
+            'label' => 'East Africa',
             'options' => [
                 ['id' => 1, 'name' => 'Uganda'],
                 ['id' => 2, 'name' => 'Kenya'],
@@ -54,7 +54,7 @@ class DemoPage extends Component
             ],
         ],
         [
-            'label'   => 'West Africa',
+            'label' => 'West Africa',
             'options' => [
                 ['id' => 4, 'name' => 'Ghana'],
                 ['id' => 5, 'name' => 'Nigeria'],
@@ -62,13 +62,13 @@ class DemoPage extends Component
             ],
         ],
         [
-            'label'   => 'Southern Africa',
+            'label' => 'Southern Africa',
             'options' => [
                 ['id' => 6, 'name' => 'South Africa'],
             ],
         ],
         [
-            'label'   => 'North Africa',
+            'label' => 'North Africa',
             'options' => [
                 ['id' => 8, 'name' => 'Morocco'],
                 ['id' => 9, 'name' => 'Egypt'],
@@ -84,11 +84,13 @@ class DemoPage extends Component
     #[On('searchable-select:search')]
     public function handleAsyncSearch(string $query, ?string $key): void
     {
-        if ($key !== 'async_id') return;
+        if ($key !== 'async_id') {
+            return;
+        }
 
         $this->async_options = array_values(array_filter(
             $this->countries,
-            fn($c) => str_contains(strtolower($c['name']), strtolower($query))
+            fn ($c) => str_contains(strtolower($c['name']), strtolower($query))
         ));
     }
 
